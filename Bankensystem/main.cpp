@@ -5,7 +5,6 @@
 
 int main() {
     // initial stock values & bank
-    srand(time(nullptr));
     Bank liliBank(fillPortfolio(), "liliBank", 8080);
     Bank softBank(fillPortfolio(), "softBank", 8080);
     Bank goodBank(fillPortfolio(), "goodBank", 8080);

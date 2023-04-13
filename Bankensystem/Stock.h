@@ -7,17 +7,15 @@
 
 #include "string"
 #include "vector"
+#include "random"
 
 using namespace std;
 
 class Stock {
 public:
-    Stock(string acronym, unsigned int price, unsigned int amount)
-            : acronym(acronym), price(price), amount(amount) {
-
+    Stock(string acronym, unsigned int price)
+            : acronym(acronym), price(price) {
     }
-
-    explicit Stock(const string &acronym) : acronym(acronym) {}
 
     string getAcronym() {
         return this->acronym;
@@ -35,25 +33,10 @@ public:
         this->price = price;
     }
 
-    unsigned int getAmount() {
-        return this->amount;
-    }
 
-    void setAmount(unsigned int amount) {
-        this->amount = amount;
-    }
-
-    void randomizeStock() {
-        srand(time(nullptr));
-        this->price = rand() % 251 + 50;
-        this->amount = rand() % 801 + 200;
-    }
-
-
-private:
+protected:
     string acronym;
     unsigned int price;
-    unsigned int amount;
 };
 
 

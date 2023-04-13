@@ -3,7 +3,7 @@
 //
 
 #include "vector"
-#include "Stock.h"
+#include "BStock.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -18,7 +18,6 @@
 #include <sys/types.h>
 #include <arpa/inet.h>
 
-#define MAXLINE 1024
 
 using namespace std;
 
@@ -27,15 +26,12 @@ using namespace std;
 
 class Bank {
 public:
-    Bank(vector<Stock *> stocks, string name, int udpPort)
+    Bank(vector<BStock *> stocks, string name, int udpPort)
             : portfolio(stocks), cashReserves(100000), outstandingLoans(30000), totalValue(0), name(name) {
         updateTotalValue();
         printTotalValue();
 
-
-        char buffer[MAXLINE];
-        const char *hello = "Hello from server";
-        struct sockaddr_in servaddr, cliaddr;
+        sockaddr_in servaddr, cliaddr;
 
         // Creating socket file descriptor
         if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
@@ -52,19 +48,11 @@ public:
         servaddr.sin_port = htons(udpPort);
 
         // Bind the socket with the server address
-        bind(sockfd, (const struct sockaddr *) &servaddr,
-             sizeof(servaddr));
-
-        socklen_t len;
-        int n;
-
-        len = sizeof(cliaddr); //len is value/result
-
-        n = recvfrom(sockfd, (char *) buffer, MAXLINE,
-                     MSG_WAITALL, (struct sockaddr *) &cliaddr,
-                     &len);
-        buffer[n] = '\0';
-        printf("Client : %s\n", buffer);
+        if (::bind(sockfd, (const struct sockaddr *) &servaddr,
+                   sizeof(servaddr)) < 0) {
+            perror("bind failed");
+            exit(EXIT_FAILURE);
+        }
     }
 
 
@@ -72,10 +60,10 @@ public:
         return this->totalValue;
     }
 
-    void updateStock(string acronym, unsigned int price) {
-        for (int i = 0; i < this->portfolio.size(); i++) {
-            if (this->portfolio[i]->getAcronym() == acronym) {
-                this->portfolio[i]->setPrice(price);
+    void updateStock(const string &acronym, unsigned int price) {
+        for (auto &i: this->portfolio) {
+            if (i->getAcronym() == acronym) {
+                i->setPrice(price);
                 cout << "Stockvalue updated!" << endl;
                 updateTotalValue();
                 printTotalValue();
@@ -85,8 +73,8 @@ public:
     }
 
     void updateTotalValue() {
-        for (int i = 0; i < this->portfolio.size(); i++) {
-            this->totalValue += (this->portfolio.at(i)->getAmount() * this->portfolio.at(i)->getPrice());
+        for (auto &i: this->portfolio) {
+            this->totalValue += (i->getAmount() * i->getPrice());
         }
         totalValue += cashReserves;
         totalValue -= outstandingLoans;
@@ -97,7 +85,7 @@ public:
     }
 
 private:
-    vector<Stock *> portfolio;
+    vector<BStock *> portfolio;
     int cashReserves;
     int outstandingLoans;
     unsigned int totalValue;

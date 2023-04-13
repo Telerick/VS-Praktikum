@@ -5,30 +5,49 @@
 #ifndef BANKENSYSTEM_STOCKSINITDATA_H
 #define BANKENSYSTEM_STOCKSINITDATA_H
 
-#include "Stock.h"
+#include "BStock.h"
+#include "SMStock.h"
 #include <vector>
 
-vector<Stock *> fillPortfolio() {
-    vector<Stock *> stocksInit;
+vector<BStock *> fillPortfolio() {
+    vector<BStock *> stocksInit;
 
-    stocksInit.push_back(new Stock("LSFT", 200, 0));
-    stocksInit.push_back(new Stock("TC19", 60, 0));
-    stocksInit.push_back(new Stock("MNSW", 300, 0));
-    stocksInit.push_back(new Stock("MFC", 180, 0));
-    stocksInit.push_back(new Stock("GDAG", 120, 0));
-    stocksInit.push_back(new Stock("TB2", 230, 0));
-    stocksInit.push_back(new Stock("JOI", 90, 0));
+    stocksInit.push_back(new BStock("LSFT", 200, 0));
+    stocksInit.push_back(new BStock("TC19", 60, 0));
+    stocksInit.push_back(new BStock("MNSW", 300, 0));
+    stocksInit.push_back(new BStock("MFC", 180, 0));
+    stocksInit.push_back(new BStock("GDAG", 120, 0));
+    stocksInit.push_back(new BStock("TB2", 230, 0));
+    stocksInit.push_back(new BStock("JOI", 90, 0));
 
-    vector<Stock *> stocks;
+    vector<BStock *> stocks;
 
-    int random = rand() % 5 + 2; // + 2 für Mindestanzahl von 3 Aktientypen
+    mt19937 rng(std::random_device{}());
+    uniform_real_distribution<int> dist(2, 6);
+    int random = dist(rng);
 
     for (int i = 0; i < random; i++) {
-        int randomAmount = rand() % 801 + 200;
-        stocksInit[i]->setAmount(randomAmount);
+
+        uniform_real_distribution<int> dist2(200, 1000);
         stocks.push_back(stocksInit[i]);
+        stocksInit[i]->setAmount(dist2(rng));
+
     }
     return stocks;
+}
+
+vector<SMStock *> fillStocketMarket() {
+    vector<SMStock *> stocksInit;
+
+    stocksInit.push_back(new SMStock("LSFT", 200));
+    stocksInit.push_back(new SMStock("TC19", 60));
+    stocksInit.push_back(new SMStock("MNSW", 300));
+    stocksInit.push_back(new SMStock("MFC", 180));
+    stocksInit.push_back(new SMStock("GDAG", 120));
+    stocksInit.push_back(new SMStock("TB2", 230));
+    stocksInit.push_back(new SMStock("JOI", 90));
+
+
 }
 
 #endif // BANKENSYSTEM_STOCKSINITDATA_H

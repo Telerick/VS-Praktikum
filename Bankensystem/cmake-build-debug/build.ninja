@@ -51,7 +51,7 @@ build cmake_object_order_depends_target_Bankensystem: phony || CMakeFiles/Banken
 
 build CMakeFiles/Bankensystem.dir/main.cpp.o: CXX_COMPILER__Bankensystem_Debug /Users/erikberg/Semester6/VS/Praktikum/Bankensystem/main.cpp || cmake_object_order_depends_target_Bankensystem
   DEP_FILE = CMakeFiles/Bankensystem.dir/main.cpp.o.d
-  FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.1.sdk -fcolor-diagnostics -std=gnu++17
+  FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.1.sdk -fcolor-diagnostics -std=gnu++14
   OBJECT_DIR = CMakeFiles/Bankensystem.dir
   OBJECT_FILE_DIR = CMakeFiles/Bankensystem.dir
 
