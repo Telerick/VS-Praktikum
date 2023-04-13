@@ -1,0 +1,3 @@
+/Users/erikberg/Semester6/VS/Praktikum/Bankensystem/cmake-build-debug/CMakeFiles/Bankensystem.dir
+/Users/erikberg/Semester6/VS/Praktikum/Bankensystem/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/erikberg/Semester6/VS/Praktikum/Bankensystem/cmake-build-debug/CMakeFiles/rebuild_cache.dir
