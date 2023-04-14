@@ -2,7 +2,7 @@
 // Created by Erik Berg on 12.04.23.
 //
 #include <iostream>
-#include "SMStock.h"
+#include "../Stock/SMStock.h"
 
 #ifndef BANKENSYSTEM_STOCKMARKET_H
 #define BANKENSYSTEM_STOCKMARKET_H

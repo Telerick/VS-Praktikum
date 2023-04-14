@@ -5,8 +5,8 @@
 #ifndef BANKENSYSTEM_INITDATA_H
 #define BANKENSYSTEM_INITDATA_H
 
-#include "BStock.h"
-#include "SMStock.h"
+#include "../Stock/BStock.h"
+#include "../Stock/SMStock.h"
 
 std::vector<BStock *> fillPortfolio() {
     std::vector<BStock *> stocksInit;

@@ -3,7 +3,7 @@
 //
 
 #include "vector"
-#include "../BStock.h"
+#include "../Stock/BStock.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -68,24 +68,25 @@ public:
         stockMarketAddr.sin_port = htons(STOCK_MARKET_PORT);
         stockMarketAddr.sin_addr.s_addr = inet_addr(STOCK_MARKET_IP);
         sendto(sockfd, acronymMsg.c_str(), acronymMsg.length(), 0, (struct sockaddr *)&stockMarketAddr, sizeof(stockMarketAddr));
-        */
+
 
         // start the receive thread
         std::thread recvThread(&Bank::receiveMessage, this, sockfd);
 
         // detach the thread to let it run in the background
         recvThread.detach();
+        */
     }
 
 
-    void receiveMessage(int sockfd) {
+    void receiveMessage() {
         while (true) {
             // wait for an incoming message
             std::string message;
             message.resize(1024); // allocate space for the received message
             struct sockaddr_in src_addr;
             socklen_t addrlen = sizeof(src_addr);
-            int nbytes = recvfrom(sockfd, &message[0], message.size(), 0, (struct sockaddr *) &src_addr, &addrlen);
+            int nbytes = recvfrom(this->sockfd, &message[0], message.size(), 0, (struct sockaddr *) &src_addr, &addrlen);
             if (nbytes < 0) {
                 std::cerr << "Error receiving message" << std::endl;
                 break;

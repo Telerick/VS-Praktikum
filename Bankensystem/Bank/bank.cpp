@@ -3,11 +3,12 @@
 //
 
 #include "Bank.h"
-#include "../initData.h"
+#include "../Data/initData.h"
 
 
 
 int main() {
     srand(time(0));
     Bank bank(fillPortfolio(), bankNames[rand() % 30], 8080);
+    bank.receiveMessage();
 };
