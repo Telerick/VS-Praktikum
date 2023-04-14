@@ -17,7 +17,10 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
+#include "sstream"
 
+#define STOCK_MARKET_PORT 8080 //TODO: Change (eventually)
+#define STOCK_MARKET_IP "127.0.0.1" //TODO: Change
 
 using namespace std;
 
@@ -26,7 +29,7 @@ using namespace std;
 
 class Bank {
 public:
-    Bank(vector<BStock *> stocks, string name, int udpPort)
+    Bank(vector<BStock*> stocks, string name, int udpPort)
             : portfolio(stocks), cashReserves(100000), outstandingLoans(30000), totalValue(0), name(name) {
         updateTotalValue();
         printTotalValue();
@@ -47,14 +50,65 @@ public:
         servaddr.sin_addr.s_addr = INADDR_ANY;
         servaddr.sin_port = htons(udpPort);
 
-        /*
         // Bind the socket with the server address
         if (::bind(sockfd, (const struct sockaddr *) &servaddr,
                    sizeof(servaddr)) < 0) {
             perror("bind failed");
             exit(EXIT_FAILURE);
         }
-        */
+
+        cout << this->name << " ready for receiving messages" << endl;
+
+        // send a message with all acronyms to the stockMarket
+        std::string acronymMsg = "";
+        for (auto stock : stocks) {
+            acronymMsg += stock->getAcronym() + " ";
+        }
+        struct sockaddr_in stockMarketAddr;
+        memset(&stockMarketAddr, 0, sizeof(stockMarketAddr));
+        stockMarketAddr.sin_family = AF_INET;
+        stockMarketAddr.sin_port = htons(STOCK_MARKET_PORT);
+        stockMarketAddr.sin_addr.s_addr = inet_addr(STOCK_MARKET_IP);
+        sendto(sockfd, acronymMsg.c_str(), acronymMsg.length(), 0, (struct sockaddr *)&stockMarketAddr, sizeof(stockMarketAddr));
+
+        // start the receive thread
+        std::thread recvThread(&Bank::receiveMessage, this, sockfd);
+
+        // detach the thread to let it run in the background
+        recvThread.detach();
+    }
+
+
+    void receiveMessage(int sockfd)
+    {
+        while (true) {
+            // wait for an incoming message
+            std::string message;
+            message.resize(1024); // allocate space for the received message
+            struct sockaddr_in src_addr;
+            socklen_t addrlen = sizeof(src_addr);
+            int nbytes = recvfrom(sockfd, &message[0], message.size(), 0, (struct sockaddr *)&src_addr, &addrlen);
+            if (nbytes < 0) {
+                std::cerr << "Error receiving message" << std::endl;
+                break;
+            }
+
+            // split the message into its parts
+            std::istringstream iss(message);
+            std::string acronym;
+            unsigned int price, amount;
+            iss >> acronym >> price >> amount;
+
+            // print the received message parts and source address
+            std::cout << "Received " << nbytes << " bytes from " << inet_ntoa(src_addr.sin_addr) << std::endl;
+            std::cout << "Acronym: " << acronym << std::endl;
+            std::cout << "Price: " << price << std::endl;
+            std::cout << "Amount: " << amount << std::endl;
+
+            updateStock(acronym, price);
+            updateTotalValue();
+            printTotalValue();
+        }
     }
 
 
@@ -66,7 +120,7 @@ public:
         for (auto &i: this->portfolio) {
             if (i->getAcronym() == acronym) {
                 i->setPrice(price);
-                cout << "Stockvalue updated!" << endl;
+                cout << "Stock price updated!" << endl;
                 updateTotalValue();
                 printTotalValue();
                 return;
@@ -84,6 +138,14 @@ public:
 
     void printTotalValue() {
         cout << "Total Value " + this->name + ": " << this->totalValue << "€" << endl;
+    }
+
+    unsigned int findStockIndex(string acronym) {
+        for (int i = 0; i < this->portfolio.size(); i++) {
+            if (this->portfolio[i]->getAcronym() == acronym) {
+                return i;
+            }
+        }
     }
 
 private:
