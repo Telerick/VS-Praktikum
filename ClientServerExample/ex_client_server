@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ -z "$1"  ] || [ -z "$2"  ]
+then 
+    echo "Correct usage: ./$0 <filename1> <filename2> #without cpp extensions"
+fi
+g++ $1.cpp -o $1
+g++ $2.cpp -o $2
+echo "Files compiled, executing now"
+./$1 & ./$2
