@@ -51,7 +51,13 @@ build cmake_object_order_depends_target_Bankensystem: phony || CMakeFiles/Banken
 
 build CMakeFiles/Bankensystem.dir/main.cpp.o: CXX_COMPILER__Bankensystem_Debug /Users/erikberg/Semester6/VS/Praktikum/Bankensystem/main.cpp || cmake_object_order_depends_target_Bankensystem
   DEP_FILE = CMakeFiles/Bankensystem.dir/main.cpp.o.d
-  FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.1.sdk -fcolor-diagnostics -std=gnu++14
+  FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.1.sdk -fcolor-diagnostics -std=gnu++17
+  OBJECT_DIR = CMakeFiles/Bankensystem.dir
+  OBJECT_FILE_DIR = CMakeFiles/Bankensystem.dir
+
+build CMakeFiles/Bankensystem.dir/bank.cpp.o: CXX_COMPILER__Bankensystem_Debug /Users/erikberg/Semester6/VS/Praktikum/Bankensystem/bank.cpp || cmake_object_order_depends_target_Bankensystem
+  DEP_FILE = CMakeFiles/Bankensystem.dir/bank.cpp.o.d
+  FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.1.sdk -fcolor-diagnostics -std=gnu++17
   OBJECT_DIR = CMakeFiles/Bankensystem.dir
   OBJECT_FILE_DIR = CMakeFiles/Bankensystem.dir
 
@@ -63,7 +69,7 @@ build CMakeFiles/Bankensystem.dir/main.cpp.o: CXX_COMPILER__Bankensystem_Debug /
 #############################################
 # Link the executable Bankensystem
 
-build Bankensystem: CXX_EXECUTABLE_LINKER__Bankensystem_Debug CMakeFiles/Bankensystem.dir/main.cpp.o
+build Bankensystem: CXX_EXECUTABLE_LINKER__Bankensystem_Debug CMakeFiles/Bankensystem.dir/main.cpp.o CMakeFiles/Bankensystem.dir/bank.cpp.o
   FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.1.sdk
   OBJECT_DIR = CMakeFiles/Bankensystem.dir
   POST_BUILD = :

@@ -47,6 +47,8 @@ public:
 private:
     string Name;
     vector<SMStock *> stocksOnMarket;
+private:
+    std::vector<Stock *> stocksOnMarket;
 };
 
 

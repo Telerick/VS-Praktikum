@@ -11,19 +11,17 @@
 #include <cstdlib>
 #include <ctime>
 
-using namespace std;
-
 class Stock {
 public:
-    Stock(string acronym, unsigned int price)
+    Stock(std::string acronym, unsigned int price)
             : acronym(acronym), price(price) {
     }
 
-    string getAcronym() {
+    std::string getAcronym() {
         return this->acronym;
     }
 
-    void setAcronym(string acronym) {
+    void setAcronym(std::string acronym) {
         this->acronym = acronym;
     }
 
@@ -37,7 +35,7 @@ public:
 
 
 protected:
-    string acronym;
+    std::string acronym;
     unsigned int price;
 };
 

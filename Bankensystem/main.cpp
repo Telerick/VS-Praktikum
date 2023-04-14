@@ -1,6 +1,6 @@
 #include <iostream>
-#include "Bank.h"
-#include "stocksInitData.h"
+#include "Bank/Bank.h"
+#include "initData.h"
 
 int main() {
     // initial stock values & bank

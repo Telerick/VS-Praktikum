@@ -9,11 +9,12 @@
 
 class SMStock : public Stock {
 public:
-    SMStock(string acronym, unsigned int price)
+    SMStock(std::string acronym, unsigned int price)
             : Stock(acronym, price) {
     }
 
     string createRandomizedStockMessage() {
+
         float courseChangeFactor = ((float)rand()/(float)RAND_MAX) * 0.38 - 0.19;
 
         this->price += (unsigned int)(courseChangeFactor * this->price);
@@ -25,7 +26,7 @@ public:
 
 
 private:
-    vector<string> addresses;
+    std::vector<std::string> addresses;
 };
 
 
