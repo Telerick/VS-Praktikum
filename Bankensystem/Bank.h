@@ -22,8 +22,6 @@
 #define STOCK_MARKET_PORT 8080 //TODO: Change (eventually)
 #define STOCK_MARKET_IP "127.0.0.1" //TODO: Change
 
-using namespace std;
-
 #ifndef BANKENSYSTEM_BANK_H
 #define BANKENSYSTEM_BANK_H
 
