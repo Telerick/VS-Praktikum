@@ -13,7 +13,7 @@ public:
             : Stock(acronym, price) {
     }
 
-    string createRandomizedStockMessage() {
+    std::string createRandomizedStockMessage() {
 
         float courseChangeFactor = ((float)rand()/(float)RAND_MAX) * 0.38 - 0.19;
 

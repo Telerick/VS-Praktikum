@@ -12,7 +12,6 @@ class BStock : public Stock{
 public:
     BStock(std::string acronym, unsigned int price, unsigned int amount)
     : Stock(acronym, price), amount(amount) {
-
     }
 
     unsigned int getAmount() {

@@ -64,7 +64,7 @@ int startServer() {
     return 0;
 }
 
-int sendMessage(string message) {
+int sendMessage(std::string message) {
     int sockfd, n;
     socklen_t len;
     char buffer[BUF_SIZE];
@@ -86,7 +86,7 @@ int sendMessage(string message) {
 
     // Send message to server
     sendto(sockfd, message.c_str(), message.length(), MSG_CONFIRM, (const struct sockaddr *) &servaddr, sizeof(servaddr));
-    cout << message << endl;
+    std::cout << message << std::endl;
 
     close(sockfd);
 
@@ -101,7 +101,7 @@ int main() {
     stockMarket1.printStockMarket();
 
     while(true){
-        string message = stockMarket1.generateTransaction();
+        std::string message = stockMarket1.generateTransaction();
         sendMessage(message);
         std::this_thread::sleep_until(std::chrono::system_clock::now() + std::chrono::seconds(5));
     }

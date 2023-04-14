@@ -11,15 +11,15 @@ class StockMarket {
 
 public:
 
-    const string getName() {
+    const std::string getName() {
         return Name;
     }
 
-    void setName(const string &name) {
+    void setName(const std::string &name) {
         Name = name;
     }
 
-    const vector<SMStock *> &getStocksOnMarket() {
+    const std::vector<SMStock *> &getStocksOnMarket() {
         return stocksOnMarket;
     }
 
@@ -35,20 +35,18 @@ public:
 
     void printStockMarket(){
         for (int i = 0; i < stocksOnMarket.size(); ++i) {
-            std::cout << stocksOnMarket[i]->getAcronym() << endl;
+            std::cout << stocksOnMarket[i]->getAcronym() << std::endl;
         }
     }
 
-    string generateTransaction(){
+    std::string generateTransaction(){
         int index = rand()%stocksOnMarket.size();
         return stocksOnMarket[index]->createRandomizedStockMessage();
     }
 
 private:
-    string Name;
-    vector<SMStock *> stocksOnMarket;
-private:
-    std::vector<Stock *> stocksOnMarket;
+    std::string Name;
+    std::vector<SMStock *> stocksOnMarket;
 };
 
 
