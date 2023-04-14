@@ -7,7 +7,6 @@
 
 #include "BStock.h"
 #include "SMStock.h"
-#include <vector>
 
 vector<BStock *> fillPortfolio() {
     vector<BStock *> stocksInit;
@@ -22,15 +21,13 @@ vector<BStock *> fillPortfolio() {
 
     vector<BStock *> stocks;
 
-    mt19937 rng(std::random_device{}());
-    uniform_real_distribution<int> dist(2, 6);
-    int random = dist(rng);
+    int numOfDifferentStocks = rand() % 5 + 2;
 
-    for (int i = 0; i < random; i++) {
+    for (int i = 0; i < numOfDifferentStocks; i++) {
 
-        uniform_real_distribution<int> dist2(200, 1000);
+        unsigned int stockAmount = rand() % 951 + 50;
         stocks.push_back(stocksInit[i]);
-        stocksInit[i]->setAmount(dist2(rng));
+        stocksInit[i]->setAmount(stockAmount);
 
     }
     return stocks;

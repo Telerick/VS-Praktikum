@@ -8,6 +8,8 @@
 #include "string"
 #include "vector"
 #include "random"
+#include <cstdlib>
+#include <ctime>
 
 using namespace std;
 

@@ -14,14 +14,15 @@ public:
     }
 
     string createRandomizedStockMessage() {
-        mt19937 rng(std::random_device{}());
 
-        uniform_real_distribution<float> dist(-0.1, 0.1);
-        this->price += dist(rng) * this->price;
+        srand(time(0));
+        float courseChangeFactor = ((float)rand()/(float)RAND_MAX) * 0.38 - 0.19;
 
-        uniform_real_distribution<int> dist2(50, 500);
+        this->price += (unsigned int)(courseChangeFactor * this->price);
 
-        return this->acronym + " " + std::to_string(this->price) + " " + std::to_string(dist2(rng));
+        unsigned int stockAmount = rand() % 451 + 50;
+
+        return this->acronym + " " + std::to_string(this->price) + " " + std::to_string(stockAmount);
     }
 
 

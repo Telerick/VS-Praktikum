@@ -1,10 +1,10 @@
 #include <iostream>
 #include "Bank.h"
-#include "vector"
 #include "stocksInitData.h"
 
 int main() {
     // initial stock values & bank
+    srand(time(0));
     Bank liliBank(fillPortfolio(), "liliBank", 8080);
     Bank softBank(fillPortfolio(), "softBank", 8080);
     Bank goodBank(fillPortfolio(), "goodBank", 8080);
@@ -14,5 +14,6 @@ int main() {
     Bank felixBank(fillPortfolio(), "felixBank", 8080);
 
     rickBank.updateStock("TC19", 289);
+
 }
 

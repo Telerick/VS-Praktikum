@@ -47,12 +47,14 @@ public:
         servaddr.sin_addr.s_addr = INADDR_ANY;
         servaddr.sin_port = htons(udpPort);
 
+        /*
         // Bind the socket with the server address
         if (::bind(sockfd, (const struct sockaddr *) &servaddr,
                    sizeof(servaddr)) < 0) {
             perror("bind failed");
             exit(EXIT_FAILURE);
         }
+        */
     }
 
 
