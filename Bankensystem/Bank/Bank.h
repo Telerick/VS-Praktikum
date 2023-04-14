@@ -3,7 +3,7 @@
 //
 
 #include "vector"
-#include "BStock.h"
+#include "../BStock.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -27,7 +27,7 @@
 
 class Bank {
 public:
-    Bank(vector<BStock*> stocks, string name, int udpPort)
+    Bank(std::vector<BStock *> stocks, std::string name, int udpPort)
             : portfolio(stocks), cashReserves(100000), outstandingLoans(30000), totalValue(0), name(name) {
         updateTotalValue();
         printTotalValue();
@@ -55,9 +55,9 @@ public:
             exit(EXIT_FAILURE);
         }
 
-        cout << this->name << " ready for receiving messages" << endl;
+        std::cout << this->name << " ready for receiving messages" << std::endl;
 
-        // send a message with all acronyms to the stockMarket
+        /* send a message with all acronyms to the stockMarket
         std::string acronymMsg = "";
         for (auto stock : stocks) {
             acronymMsg += stock->getAcronym() + " ";
@@ -68,6 +68,7 @@ public:
         stockMarketAddr.sin_port = htons(STOCK_MARKET_PORT);
         stockMarketAddr.sin_addr.s_addr = inet_addr(STOCK_MARKET_IP);
         sendto(sockfd, acronymMsg.c_str(), acronymMsg.length(), 0, (struct sockaddr *)&stockMarketAddr, sizeof(stockMarketAddr));
+        */
 
         // start the receive thread
         std::thread recvThread(&Bank::receiveMessage, this, sockfd);
@@ -77,15 +78,14 @@ public:
     }
 
 
-    void receiveMessage(int sockfd)
-    {
+    void receiveMessage(int sockfd) {
         while (true) {
             // wait for an incoming message
             std::string message;
             message.resize(1024); // allocate space for the received message
             struct sockaddr_in src_addr;
             socklen_t addrlen = sizeof(src_addr);
-            int nbytes = recvfrom(sockfd, &message[0], message.size(), 0, (struct sockaddr *)&src_addr, &addrlen);
+            int nbytes = recvfrom(sockfd, &message[0], message.size(), 0, (struct sockaddr *) &src_addr, &addrlen);
             if (nbytes < 0) {
                 std::cerr << "Error receiving message" << std::endl;
                 break;
@@ -114,11 +114,11 @@ public:
         return this->totalValue;
     }
 
-    void updateStock(const string &acronym, unsigned int price) {
+    void updateStock(const std::string &acronym, unsigned int price) {
         for (auto &i: this->portfolio) {
             if (i->getAcronym() == acronym) {
                 i->setPrice(price);
-                cout << "Stock price updated!" << endl;
+                std::cout << "Stock price updated!" << std::endl;
                 updateTotalValue();
                 printTotalValue();
                 return;
@@ -135,23 +135,15 @@ public:
     }
 
     void printTotalValue() {
-        cout << "Total Value " + this->name + ": " << this->totalValue << "€" << endl;
-    }
-
-    unsigned int findStockIndex(string acronym) {
-        for (int i = 0; i < this->portfolio.size(); i++) {
-            if (this->portfolio[i]->getAcronym() == acronym) {
-                return i;
-            }
-        }
+        std::cout << "Total Value " + this->name + ": " << this->totalValue << "€" << std::endl;
     }
 
 private:
-    vector<BStock *> portfolio;
+    std::vector<BStock *> portfolio;
     int cashReserves;
     int outstandingLoans;
     unsigned int totalValue;
-    string name;
+    std::string name;
     int sockfd;
 };
 

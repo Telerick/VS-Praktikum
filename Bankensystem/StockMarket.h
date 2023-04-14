@@ -10,9 +10,8 @@ class StockMarket {
 
 public:
 
-
 private:
-    vector<Stock *> stocksOnMarket;
+    std::vector<Stock *> stocksOnMarket;
 };
 
 

@@ -2,14 +2,14 @@
 // Created by Erik Berg on 12.04.23.
 //
 
-#ifndef BANKENSYSTEM_STOCKSINITDATA_H
-#define BANKENSYSTEM_STOCKSINITDATA_H
+#ifndef BANKENSYSTEM_INITDATA_H
+#define BANKENSYSTEM_INITDATA_H
 
 #include "BStock.h"
 #include "SMStock.h"
 
-vector<BStock *> fillPortfolio() {
-    vector<BStock *> stocksInit;
+std::vector<BStock *> fillPortfolio() {
+    std::vector<BStock *> stocksInit;
 
     stocksInit.push_back(new BStock("LSFT", 200, 0));
     stocksInit.push_back(new BStock("TC19", 60, 0));
@@ -19,7 +19,7 @@ vector<BStock *> fillPortfolio() {
     stocksInit.push_back(new BStock("TB2", 230, 0));
     stocksInit.push_back(new BStock("JOI", 90, 0));
 
-    vector<BStock *> stocks;
+    std::vector<BStock *> stocks;
 
     int numOfDifferentStocks = rand() % 5 + 2;
 
@@ -33,8 +33,8 @@ vector<BStock *> fillPortfolio() {
     return stocks;
 }
 
-vector<SMStock *> fillStocketMarket() {
-    vector<SMStock *> stocksInit;
+std::vector<SMStock *> fillStocketMarket() {
+    std::vector<SMStock *> stocksInit;
 
     stocksInit.push_back(new SMStock("LSFT", 200));
     stocksInit.push_back(new SMStock("TC19", 60));
@@ -44,7 +44,15 @@ vector<SMStock *> fillStocketMarket() {
     stocksInit.push_back(new SMStock("TB2", 230));
     stocksInit.push_back(new SMStock("JOI", 90));
 
-
+    return stocksInit;
 }
 
-#endif // BANKENSYSTEM_STOCKSINITDATA_H
+std::vector<std::string> bankNames = {"liliBank", "softBank", "goodBank", "rickBank", "lionBank", "norbiBank",
+                                      "felixBank", "hagenBank", "fishBank", "sandBank", "parkBank", "germanBank",
+                                      "lolBank", "miauBank", "wuffBank", "blubbBank", "mountainBank", "lalaBank",
+                                      "crazyBank", "peterBank", "michaelBank", "spardaBank", "postBank", "inselBank",
+                                      "richBank", "poorBank", "bestBank", "badBank", "funnyBank","monkeyBank" };
+
+
+
+#endif // BANKENSYSTEM_INITDATA_H
