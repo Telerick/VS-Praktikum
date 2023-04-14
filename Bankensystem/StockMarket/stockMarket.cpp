@@ -1,10 +1,5 @@
 #include "StockMarket.h"
-#include "initData.h"
 #include <thread>
-#include <chrono>
-
-#include <iostream>
-#include <cstring>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
