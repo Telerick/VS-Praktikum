@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  bank1:
+    container_name: bankErik
+    build: ./Bank/
+  bank2:
+    container_name: bankTill
+    build: ./Bank/
+  bank3:
+    container_name: bankTobi
+    build: ./Bank/
+  bank4:
+    container_name: bankLeon
+    build: ./Bank/
+  stock-market:
+    container_name: stockMarket
+    build: ./StockMarket/
+    depends_on:
+      - bank1
+      - bank2
+      - bank3
+      - bank4
