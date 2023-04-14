@@ -1,5 +1,5 @@
 #include "StockMarket.h"
-#include "stocksInitData.h"
+#include "initData.h"
 #include <thread>
 #include <chrono>
 
