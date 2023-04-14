@@ -14,8 +14,6 @@ public:
     }
 
     string createRandomizedStockMessage() {
-
-        srand(time(0));
         float courseChangeFactor = ((float)rand()/(float)RAND_MAX) * 0.38 - 0.19;
 
         this->price += (unsigned int)(courseChangeFactor * this->price);
