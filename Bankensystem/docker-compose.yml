@@ -3,21 +3,25 @@ version: '3'
 services:
   bank1:
     container_name: bankErik
-    build: ./Bank/
-  bank2:
-    container_name: bankTill
-    build: ./Bank/
-  bank3:
-    container_name: bankTobi
-    build: ./Bank/
-  bank4:
-    container_name: bankLeon
-    build: ./Bank/
+    build: 
+      context: .
+      dockerfile: Dockerfile_bank
+  # bank2:
+  #   container_name: bankTill
+  #   build: ./Bank/
+  # bank3:
+  #   container_name: bankTobi
+  #   build: ./Bank/
+  # bank4:
+  #   container_name: bankLeon
+  #   build: ./Bank/
   stock-market:
     container_name: stockMarket
-    build: ./StockMarket/
+    build:
+      context: .
+      dockerfile: Dockerfile_stockMarket
     depends_on:
       - bank1
-      - bank2
-      - bank3
-      - bank4
+      # - bank2
+      # - bank3
+      # - bank4
