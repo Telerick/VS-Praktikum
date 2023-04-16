@@ -4,12 +4,14 @@
 
 #include "Bank.h"
 #include "../Data/initData.h"
+#include "functional"
 
 int main() {
-    srand(time(0));
-    // Bank bank(fillPortfolio(), bankNames[rand() % 30], 8080);
-    Bank bank(fillPortfolio(), std::getenv("CONTAINER_NAME"));
+    std::string containerName = std::getenv("CONTAINER_NAME");
+    std::hash<std::string> nameHash;
+    unsigned int seed = nameHash(containerName);
+    srand(seed);
+    Bank bank(fillPortfolio(), containerName);
     bank.receiveMessage();
     std::cout << "OUTSIDE receiveMessage()" << std::endl;
-    
 };
