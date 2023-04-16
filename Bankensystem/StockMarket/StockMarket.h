@@ -3,6 +3,7 @@
 //
 #include <iostream>
 #include "../Stock/SMStock.h"
+#include <cstring>
 
 #ifndef BANKENSYSTEM_STOCKMARKET_H
 #define BANKENSYSTEM_STOCKMARKET_H
