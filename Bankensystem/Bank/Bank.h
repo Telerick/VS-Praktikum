@@ -47,7 +47,7 @@ public:
         }
 
         updateTotalValue();
-        printTotalValue();
+        printBankInformation();
 
         std::cout << "End Constructor Bank" << std::endl;
     }
@@ -132,7 +132,7 @@ public:
             updateTotalValue();
             printTotalValue();
             std::cout << "INSIDE receiveMessage()" << std::endl;
-            
+
         }
         std::cout << "End receiveMessage" << std::endl;
     }
@@ -178,6 +178,26 @@ public:
 
     void printTotalValue() {
         std::cout << "Total Value " + this->name + ": " << this->totalValue << "€" << std::endl;
+    }
+
+    void printBankName() {
+        std::cout << "Bank name " + this->name << std::endl;
+    }
+
+    void printPortfolioData() {
+        for (int i = 0; i < this->portfolio.size(); i++) {
+            std::cout << i+1 << " .Stock: " + this->portfolio[i]->getAcronym() << "\t" << "price: "
+                      << this->portfolio[i]->getPrice() << "€" <<"\t" << "Amount: " << this->portfolio[i]->getAmount()
+                      << std::endl;
+        }
+    }
+
+    void printBankInformation() {
+        printBankName();
+        std::cout << std::endl;
+        printPortfolioData();
+        std::cout << std::endl;
+        printTotalValue();
     }
 
 private:
