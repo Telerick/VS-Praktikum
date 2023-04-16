@@ -1,11 +1,14 @@
-#include "StockMarket.h"
+#include <iostream>
+#include <string>
 #include <thread>
+#include <mutex>
+#include <map>
+#include <vector>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
-#include <netdb.h>
-
-
+#include <sstream>
+#include "StockMarket.h"
 
 #ifndef MSG_CONFIRM
 #define MSG_CONFIRM 0x800
@@ -17,7 +20,202 @@
 // Created by Till Langen on 14.04.23.
 //
 
-//Starts the Server to
+//
+// global variables
+//
+std::map<std::string, std::vector<std::string> > map;
+
+std::mutex mu;
+
+//
+// functions
+//
+void addStock(std::string stock){
+    if(map.find(stock) != map.end()){
+        return; //if stock is already a key of the map
+    }
+    std::vector<std::string> v1;
+    map[stock] = v1;
+}
+
+void addSubscriber(std::string stock, std::string ip){
+    if(map.find(stock) == map.end()){
+        return; //if stock is not key of the map
+    }
+
+    for (int i = 0; i < map[stock].size(); ++i) {
+        if(map[stock][i] == ip){
+            return;
+        }
+    }
+
+    map[stock].push_back(ip);
+}
+
+void removeSubscriber(std::string stock, std::string ip){
+    if(map.find(stock) == map.end()){
+        return; //if stock is not key of the map
+    }
+
+    for (int i = 0; i < map[stock].size(); ++i) {
+        if(map[stock][i] == ip){
+            map[stock].erase(map[stock].begin()+i);
+            return;
+        }
+    }
+
+}
+
+std::vector<std::string> getSubscriber(std::string stock){
+    if(map.find(stock) == map.end()){
+        return std::vector<std::string>(); //if stock is not key of the map
+    }
+    return map[stock];
+}
+
+void printVector(std::vector<std::string> v){
+    for (const auto & i : v) {
+        std::cout << i << ", ";
+    }
+}
+
+void printMap(){
+    for (const auto& [key, value] : map){
+        std::cout << '[' << key << "] = ";
+        printVector(value);
+        std::cout << ";" << std::endl;
+    }
+}
+
+void fillMap(){
+    addStock("LSFT");
+    addStock("TC19");
+    addStock("MNSW");
+    addStock("MFC");
+    addStock("GDAG");
+    addStock("TB2");
+    addStock("JOI");
+}
+
+int sendMessage(std::string message) {
+    int sockfd, n;
+    socklen_t len;
+    char buffer[BUF_SIZE];
+    struct sockaddr_in servaddr;
+
+    // Creating socket file descriptor
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        std::cerr << "Error creating socket" << std::endl;
+        return -1;
+    }
+
+    memset(&servaddr, 0, sizeof(servaddr));
+
+    // Filling server information
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_port = htons(8080);
+    servaddr.sin_addr.s_addr = INADDR_ANY; // listen to all network adresses
+
+    // Send message to server
+    sendto(sockfd, message.c_str(), message.length(), MSG_CONFIRM, (const struct sockaddr *) &servaddr, sizeof(servaddr));
+
+    close(sockfd);
+
+    return 0;
+}
+
+void startSubscribeServer(){
+    int sockfd;
+    struct sockaddr_in servaddr;
+
+    // Creating socket file descriptor fd
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);    // socket(domain, type, protocol)
+    if (sockfd < 0) {
+        std::cerr << "Creating server socket failed" << std::endl;
+        return;
+    }
+
+    memset(&servaddr, 0, sizeof(servaddr));
+
+    // Filling server information
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_port = htons(8080);
+    servaddr.sin_addr.s_addr = INADDR_ANY;  // ALLE VERFÜGBARE SCHNITTSTELLE
+
+    // Bind the socket with the server address
+    if (::bind(sockfd, (const struct sockaddr *) &servaddr, sizeof(servaddr)) < 0) {
+        std::cerr << "Binding socket with server address failed" << std::endl;
+        return;
+    }
+
+    while(true){
+        std::string message;
+        message.resize(BUF_SIZE);
+        struct sockaddr_in cliaddr;
+        memset(&cliaddr, 0, sizeof(cliaddr));
+
+        // Wait for message from client
+        socklen_t len = sizeof(cliaddr);
+        int n = recvfrom(sockfd, &message[0], message.size(), MSG_WAITALL, (struct sockaddr *) &cliaddr, &len);
+        //buffer[n] = '\0';
+        if (n>0){
+            std::cout << "Received message: " << message << std::endl;
+
+            // split the message into its parts
+            std::istringstream iss(message);
+            std::string acronym, ip;
+            iss >> acronym >> ip;
+
+            if(acronym == "stop"){
+                return;
+            }
+
+            mu.lock();
+            addSubscriber(acronym, inet_ntoa(cliaddr.sin_addr)); //could use cliaddr.sin_addr
+            mu.unlock();
+
+            std::cout << "Subscriber list changed:" << std::endl;
+
+            printMap();
+        }
+    }
+
+    close(sockfd);
+}
+
+void transactionThread(){
+    StockMarket stockMarket1;
+    stockMarket1.initData();
+    stockMarket1.printStockMarket();
+
+    while(true){
+        std::string message = stockMarket1.generateTransaction();
+
+        // split the message into its parts
+        std::istringstream iss(message);
+        std::string acronym;
+        unsigned int price, amount;
+        iss >> acronym >> price >> amount;
+
+        std::cout << "New generated transaction: " << message << std::endl;
+
+        mu.lock();
+        std::vector<std::string> addresses = getSubscriber(acronym);
+
+        for (int i = 0; i < addresses.size(); ++i) {
+            sendMessage(addresses[i]);
+            std::cout << "Send message to: " << addresses[i] << std::endl;
+        }
+        mu.unlock();
+
+        std::this_thread::sleep_until(std::chrono::system_clock::now() + std::chrono::seconds(5));
+    }
+}
+
+//
+// olf functions (may delete later)
+//
 int startServer() {
     int sockfd, n;
     socklen_t len;
@@ -75,7 +273,7 @@ int startServer() {
     return 0;
 }
 
-int sendMessage(std::string message) {
+int sendMessageOld(std::string message) {
     int sockfd, n;
     socklen_t len;
     char buffer[BUF_SIZE];
@@ -104,7 +302,7 @@ int sendMessage(std::string message) {
     return 0;
 }
 
-int sendMessage2(std::string message) {
+int sendMessageOld2(std::string message) {
     int sockfd, n;
     socklen_t len;
     char buffer[BUF_SIZE];
@@ -150,29 +348,13 @@ int sendMessage2(std::string message) {
 
 int main() {
     srand(time(0)); //seed for random numbers
+    fillMap();
 
-    StockMarket stockMarket1;
-    stockMarket1.initData();
-    stockMarket1.printStockMarket();
+    std::thread t(transactionThread);
+    std::thread t2(startSubscribeServer);
 
-    while(true){
-        std::cout << "Preparing message" << std::endl;
-        std::string message = stockMarket1.generateTransaction();
-        sendMessage2(message);
-        std::cout << "Stockmarket before sleep" << std::endl;
-        std::this_thread::sleep_until(std::chrono::system_clock::now() + std::chrono::seconds(1));
-        std::cout << "Stockmarket next loop" << std::endl;
-
-    }
-
-/*
-    std::thread first (startServer);     // spawn new thread that calls foo()
-    std::thread second (startClient);
-
-    // synchronize threads:
-    first.join();                // pauses until first finishes
-    second.join();               // pauses until second finishes
-*/
+    t.join();
+    t2.join();
 
     return 0;
 }
