@@ -33,11 +33,9 @@ public:
         this->price = price;
     }
 
-
 protected:
     std::string acronym;
     unsigned int price;
 };
 
-
-#endif //BANKENSYSTEM_STOCK_H
+#endif // BANKENSYSTEM_STOCK_H

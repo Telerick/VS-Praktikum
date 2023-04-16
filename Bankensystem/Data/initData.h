@@ -7,52 +7,50 @@
 
 #include "../Stock/BStock.h"
 #include "../Stock/SMStock.h"
+#include <set> // für std::set
+
+std::vector<SMStock *> stocksInit = {new SMStock("TC19", 60), new SMStock("LSFT", 200), new SMStock("MNSW", 300),
+                                     new SMStock("MFC", 180), new SMStock("GDAG", 120), new SMStock("TB2", 230),
+                                     new SMStock("JOI", 120), new SMStock("UKR", 190), new SMStock("MKA", 310),
+                                     new SMStock("FCB", 60), new SMStock("BVB", 200), new SMStock("B04", 300),
+                                     new SMStock("S04", 180), new SMStock("LFC", 120), new SMStock("FRA", 230),
+                                     new SMStock("HSV", 70), new SMStock("SVW", 110), new SMStock("M05", 50)};
+
+std::vector <std::string> bankNames = {"liliBank", "softBank", "goodBank", "rickBank", "lionBank", "norbiBank",
+                                       "felixBank", "hagenBank", "fishBank", "sandBank", "parkBank", "germanBank",
+                                       "lolBank", "miauBank", "wuffBank", "blubbBank", "mountainBank", "lalaBank",
+                                       "crazyBank", "peterBank", "michaelBank", "spardaBank", "postBank", "inselBank",
+                                       "richBank", "poorBank", "bestBank", "badBank", "funnyBank", "monkeyBank"};
 
 std::vector<BStock *> fillPortfolio() {
-    std::vector<BStock *> stocksInit;
+    std::cout << "Start fillPortfolio" << std::endl;
+    std::vector < SMStock * > stocksTemp = stocksInit;
+    std::vector < BStock * > stocks;
+    std::set<int> selectedIndices;
 
-    stocksInit.push_back(new BStock("LSFT", 200, 0));
-    stocksInit.push_back(new BStock("TC19", 60, 0));
-    stocksInit.push_back(new BStock("MNSW", 300, 0));
-    stocksInit.push_back(new BStock("MFC", 180, 0));
-    stocksInit.push_back(new BStock("GDAG", 120, 0));
-    stocksInit.push_back(new BStock("TB2", 230, 0));
-    stocksInit.push_back(new BStock("JOI", 90, 0));
+    int numOfDifferentStocks = rand() % 7 + 4;
 
-    std::vector<BStock *> stocks;
-
-    int numOfDifferentStocks = rand() % 5 + 2;
-
-    for (int i = 0; i < numOfDifferentStocks; i++) {
-
-        unsigned int stockAmount = rand() % 951 + 50;
-        stocks.push_back(stocksInit[i]);
-        stocksInit[i]->setAmount(stockAmount);
-
+    while (stocks.size() < numOfDifferentStocks) {
+        int index = rand() % 30;
+        unsigned int stockAmount = rand() % 451 + 50;
+        if (selectedIndices.count(index) == 0) {
+            selectedIndices.insert(index);
+            stocks.push_back(new BStock(stocksInit[index]->getAcronym(), stocksInit[index]->getPrice(), stockAmount));
+        }
     }
+
+    std::cout << "End fillPortfolio" << std::endl;
     return stocks;
 }
 
-std::vector<SMStock *> fillStocketMarket() {
-    std::vector<SMStock *> stocksInit;
-
-    stocksInit.push_back(new SMStock("LSFT", 200));
-    stocksInit.push_back(new SMStock("TC19", 60));
-    stocksInit.push_back(new SMStock("MNSW", 300));
-    stocksInit.push_back(new SMStock("MFC", 180));
-    stocksInit.push_back(new SMStock("GDAG", 120));
-    stocksInit.push_back(new SMStock("TB2", 230));
-    stocksInit.push_back(new SMStock("JOI", 90));
-
-    return stocksInit;
+std::vector<SMStock *> fillStockMarket() {
+    std::cout << "fillStockMarket" << std::endl;
+    std::vector < SMStock * > stocksTemp = stocksInit;
+    return stocksTemp;
 }
 
-std::vector<std::string> bankNames = {"liliBank", "softBank", "goodBank", "rickBank", "lionBank", "norbiBank",
-                                      "felixBank", "hagenBank", "fishBank", "sandBank", "parkBank", "germanBank",
-                                      "lolBank", "miauBank", "wuffBank", "blubbBank", "mountainBank", "lalaBank",
-                                      "crazyBank", "peterBank", "michaelBank", "spardaBank", "postBank", "inselBank",
-                                      "richBank", "poorBank", "bestBank", "badBank", "funnyBank","monkeyBank" };
-
-
+std::string getRandomBankName() {
+    return bankNames[rand() % 30];
+}
 
 #endif // BANKENSYSTEM_INITDATA_H
