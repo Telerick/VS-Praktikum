@@ -5,10 +5,15 @@ FROM gcc:latest
 WORKDIR /app
 
 # Copy the current directory contents into the container at /app
-COPY . /app
+COPY /Stock/ /app/Stock
+# COPY . /app/Bank    
+COPY /Data/ /app/Data
+
+COPY /Bank/ /app/Bank
+
 
 # Compile the C++ program
-RUN g++ bank.cpp -o Bank
+RUN g++ -std=c++11 /app/Bank/bank.cpp -o /app/Bank/bank
 
 # Set the command to run when the container starts
-CMD ["./Bank"]
+CMD ["./Bank/bank"]

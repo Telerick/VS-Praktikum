@@ -1,0 +1,23 @@
+# Use an official Ubuntu runtime as a parent image
+FROM gcc:latest
+
+# Set the working directory to /app
+WORKDIR /app
+
+# Copy the current directory contents into the container at /app
+COPY /StockMarket /app/StockMarket
+COPY /Stock/ /app/Stock
+
+# install stuff
+# eux
+# -e: exit imme­di­ate­ly if a com­mand returns a non-zero status
+# -u: treat unset vari­ables and para­me­ters oth­er than the spe­cial para­me­ters ‘@’ or ‘*’ as an error 
+# -x: print a trace of sim­ple commands
+RUN set -eux
+RUN dir -s
+
+# Compile the C++ program
+RUN g++ -std=c++11 /app/StockMarket/stockMarket.cpp -o /app/StockMarket/stockMarket
+
+# Set the command to run when the container starts
+CMD ["./StockMarket/stockMarket"]

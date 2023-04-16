@@ -4,6 +4,7 @@
 #include <iostream>
 #include "../Data/initData.h"
 #include "../Stock/SMStock.h"
+#include <cstring>
 
 #ifndef BANKENSYSTEM_STOCKMARKET_H
 #define BANKENSYSTEM_STOCKMARKET_H
