@@ -6,22 +6,69 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile_bank
-  # bank2:
-  #   container_name: bankTill
-  #   build: ./Bank/
-  # bank3:
-  #   container_name: bankTobi
-  #   build: ./Bank/
-  # bank4:
-  #   container_name: bankLeon
-  #   build: ./Bank/
+    environment:
+      - CONTAINER_NAME=bankErik
+    healthcheck:
+      test: ["CMD-SHELL", "sleep 1"]
+    networks:
+      mynet:
+        ipv4_address: 172.20.0.3
+  bank2:
+    container_name: bankTill
+    build: 
+      context: .
+      dockerfile: Dockerfile_bank
+    environment:
+      - CONTAINER_NAME=bankTill
+    depends_on:
+      - bank1
+    networks:
+      mynet:
+        ipv4_address: 172.20.0.4
+  bank3:
+    container_name: bankLeon
+    build: 
+      context: .
+      dockerfile: Dockerfile_bank
+    environment:
+      - CONTAINER_NAME=bankLeon
+    depends_on:
+      - bank1
+      - bank2
+    networks:
+      mynet:
+        ipv4_address: 172.20.0.5
+  bank4:
+    container_name: bankTobi
+    build: 
+      context: .
+      dockerfile: Dockerfile_bank
+    environment:
+      - CONTAINER_NAME=bankTobi
+    depends_on:
+      - bank1
+      - bank2
+      - bank3
+    networks:
+      mynet:
+        ipv4_address: 172.20.0.6
   stock-market:
     container_name: stockMarket
     build:
       context: .
       dockerfile: Dockerfile_stockMarket
+    environment:
+      - CONTAINER_NAME=stockMarket
     depends_on:
       - bank1
-      # - bank2
-      # - bank3
-      # - bank4
+      - bank2
+      - bank3
+      - bank4
+    networks:
+      mynet:
+        ipv4_address: 172.20.0.2
+networks:
+  mynet:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24

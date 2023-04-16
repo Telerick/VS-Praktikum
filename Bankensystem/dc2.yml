@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  bank:
+    #container_name: banks
+    build: 
+      context: .
+      dockerfile: Dockerfile_bank
+    deploy: 
+      replicas: 2
+    #environment:
+      #- CONTAINER_NAME=bankErik, bankTill, bankLeon, bankTobi
+    env_file: 
+      - ./envFolder/bankErik.env
+      - ./envFolder/bankTill.env
+
+  stock-market:
+    container_name: stockMarket
+    build:
+      context: .
+      dockerfile: Dockerfile_stockMarket
+    depends_on:
+      - bank

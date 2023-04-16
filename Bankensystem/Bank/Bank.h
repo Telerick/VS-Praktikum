@@ -17,6 +17,10 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
+
+
+#include <netdb.h>
+
 #include "sstream"
 
 #define STOCK_MARKET_PORT 8080 //TODO: Change (eventually)
@@ -43,16 +47,24 @@ public:
         memset(&servaddr, 0, sizeof(servaddr));
         memset(&cliaddr, 0, sizeof(cliaddr));
 
+        // Get Bank hostname
+        const char* hostname = std::getenv("CONTAINER_NAME");
+        //std::cout << "HOSTNAME: " << hostname << std::endl;
+        struct hostent* server = gethostbyname(hostname);
+        if (server == NULL) {
+            std::cerr << "Error: could not resolve hostname" << std::endl;
+            return;
+        }
+
         // Filling server information
         servaddr.sin_family = AF_INET; // IPv4
         servaddr.sin_addr.s_addr = INADDR_ANY;
         servaddr.sin_port = htons(udpPort);
 
-        // Bind the socket with the server address
-        if (::bind(sockfd, (const struct sockaddr *) &servaddr,
-                   sizeof(servaddr)) < 0) {
-            perror("bind failed");
-            exit(EXIT_FAILURE);
+            // Bind the socket with the server address
+        if (bind(sockfd, (const struct sockaddr *) &servaddr, sizeof(servaddr)) < 0) {
+            std::cerr << "Bank Bind failed" << std::endl;
+            return;
         }
 
         std::cout << this->name << " ready for receiving messages" << std::endl;
@@ -81,17 +93,20 @@ public:
 
     void receiveMessage() {
         while (true) {
+            std::cout << "FIRE 1" << std::endl;
             // wait for an incoming message
             std::string message;
             message.resize(1024); // allocate space for the received message
             struct sockaddr_in src_addr;
             socklen_t addrlen = sizeof(src_addr);
-            int nbytes = recvfrom(this->sockfd, &message[0], message.size(), 0, (struct sockaddr *) &src_addr, &addrlen);
+            std::cout << "FIRE 2" << std::endl;
+            int nbytes = recvfrom(this->sockfd, &message[0], message.size(), MSG_WAITALL, (struct sockaddr *) &src_addr, &addrlen);
+
             if (nbytes < 0) {
                 std::cerr << "Error receiving message" << std::endl;
                 break;
             }
-
+            std::cout << "FIRE 3" << std::endl;
             // split the message into its parts
             std::istringstream iss(message);
             std::string acronym;
@@ -107,6 +122,8 @@ public:
             updateStock(acronym, price);
             updateTotalValue();
             printTotalValue();
+            std::cout << "INSIDE receiveMessage()" << std::endl;
+            
         }
     }
 
