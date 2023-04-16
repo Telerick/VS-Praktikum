@@ -103,7 +103,7 @@ public:
         std::cout << this->name << " ready for receiving messages" << std::endl;
 
         while (true) {
-            std::cout << "FIRE 1" << std::endl;
+            std::cout << "Before receive" << std::endl;
             // wait for an incoming message
             std::string message;
             message.resize(1024); // allocate space for the received message
@@ -115,7 +115,7 @@ public:
                 std::cerr << "Error receiving message" << std::endl;
                 break;
             }
-            std::cout << "FIRE 3" << std::endl;
+            std::cout << "After receive" << std::endl;
             // split the message into its parts
             std::istringstream iss(message);
             std::string acronym;

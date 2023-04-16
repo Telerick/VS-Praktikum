@@ -31,11 +31,11 @@ std::vector<BStock *> fillPortfolio() {
     int numOfDifferentStocks = rand() % 7 + 4;
 
     while (stocks.size() < numOfDifferentStocks) {
-        int index = rand() % 30;
+        int index = rand() % stocksInit.size();
         unsigned int stockAmount = rand() % 451 + 50;
         if (selectedIndices.count(index) == 0) {
             selectedIndices.insert(index);
-            stocks.push_back(new BStock(stocksInit[index]->getAcronym(), stocksInit[index]->getPrice(), stockAmount));
+            stocks.push_back(new BStock(stocksInit[index]->getAcronym(), stocksTemp[index]->getPrice(), stockAmount));
         }
     }
 
@@ -45,12 +45,11 @@ std::vector<BStock *> fillPortfolio() {
 
 std::vector<SMStock *> fillStockMarket() {
     std::cout << "fillStockMarket" << std::endl;
-    std::vector < SMStock * > stocksTemp = stocksInit;
-    return stocksTemp;
+    return stocksInit;
 }
 
 std::string getRandomBankName() {
-    return bankNames[rand() % 30];
+    return bankNames[rand() % stocksInit.size()];
 }
 
 #endif // BANKENSYSTEM_INITDATA_H
