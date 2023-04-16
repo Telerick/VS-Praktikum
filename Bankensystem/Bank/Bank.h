@@ -18,75 +18,94 @@
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include "sstream"
-
-#define STOCK_MARKET_PORT 8080 //TODO: Change (eventually)
-#define STOCK_MARKET_IP "127.0.0.1" //TODO: Change
+#include "netdb.h"
 
 #ifndef BANKENSYSTEM_BANK_H
 #define BANKENSYSTEM_BANK_H
 
+const int UDP_PORT = 8080;
+
 class Bank {
 public:
-    Bank(std::vector<BStock *> stocks, std::string name, int udpPort)
+    Bank(std::vector<BStock *> stocks, std::string name)
             : portfolio(stocks), cashReserves(100000), outstandingLoans(30000), totalValue(0), name(name) {
-        updateTotalValue();
-        printTotalValue();
-
-        sockaddr_in servaddr, cliaddr;
-
-        // Creating socket file descriptor
-        if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-            perror("socket creation failed");
+        std::cout << "Start Constructor Bank" << std::endl;
+        // Creating socket file descriptor for bank
+        if ((this->sockfdBank = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+            std::cerr << "Error: socket creation failed" << std::endl;
             exit(EXIT_FAILURE);
         }
 
-        memset(&servaddr, 0, sizeof(servaddr));
-        memset(&cliaddr, 0, sizeof(cliaddr));
+        // Creating socket file descriptor for stock market
+        if ((this->sockfdStockMarket = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+            std::cerr << "Error: socket creation failed" << std::endl;
+            exit(EXIT_FAILURE);
+        }
 
-        // Filling server information
-        servaddr.sin_family = AF_INET; // IPv4
-        servaddr.sin_addr.s_addr = INADDR_ANY;
-        servaddr.sin_port = htons(udpPort);
+        updateTotalValue();
+        printTotalValue();
 
-        // Bind the socket with the server address
-        if (::bind(sockfd, (const struct sockaddr *) &servaddr,
-                   sizeof(servaddr)) < 0) {
-            perror("bind failed");
+        std::cout << "End Constructor Bank" << std::endl;
+    }
+
+    void registerToStockMarket() {
+        std::cout << "Start registerToStockMarket" << std::endl;
+        sockaddr_in stockMarketAddr;
+
+        const char *hostname = "stockMarket";
+        struct hostent *stockMarket = gethostbyname(hostname);
+        if (stockMarket == NULL) {
+            std::cerr << "Error: could not resolve hostname" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+
+        // Filling stockMarket information
+        memset(&stockMarketAddr, 0, sizeof(stockMarketAddr));
+        stockMarketAddr.sin_family = AF_INET;
+        stockMarketAddr.sin_addr = *((struct in_addr *) stockMarket->h_addr);
+        stockMarketAddr.sin_port = htons(UDP_PORT);
+
+        // Bind the socket with the stockMarket address
+        if (bind(sockfdStockMarket, (const struct sockaddr *) &stockMarketAddr, sizeof(stockMarketAddr)) < 0) {
+            std::cerr << "bind failed" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+
+        std::string regMsg = createRegisterMessage();
+        // Send a registration message with hostname and all stock acronyms to the stockMarket
+        sendto(sockfdStockMarket, regMsg.c_str(), regMsg.length(), 0, (struct sockaddr *) &stockMarketAddr,
+               sizeof(stockMarketAddr));
+
+        std::cout << "End registerToStockMarket" << std::endl;
+    }
+
+    void receiveMessage() {
+        std::cout << "Start receiveMessage" << std::endl;
+
+        sockaddr_in bankAddr;
+        // Filling bank information
+        memset(&bankAddr, 0, sizeof(bankAddr));
+        bankAddr.sin_family = AF_INET;
+        bankAddr.sin_addr.s_addr = INADDR_ANY;
+        bankAddr.sin_port = htons(UDP_PORT);
+
+        // Bind the socket with the bank address
+        if (bind(sockfdBank, (const struct sockaddr *) &bankAddr,
+                 sizeof(bankAddr)) < 0) {
+            std::cerr << "Bind failed" << std::endl;
             exit(EXIT_FAILURE);
         }
 
         std::cout << this->name << " ready for receiving messages" << std::endl;
 
-        /* send a message with all acronyms to the stockMarket
-        std::string acronymMsg = "";
-        for (auto stock : stocks) {
-            acronymMsg += stock->getAcronym() + " ";
-        }
-        struct sockaddr_in stockMarketAddr;
-        memset(&stockMarketAddr, 0, sizeof(stockMarketAddr));
-        stockMarketAddr.sin_family = AF_INET;
-        stockMarketAddr.sin_port = htons(STOCK_MARKET_PORT);
-        stockMarketAddr.sin_addr.s_addr = inet_addr(STOCK_MARKET_IP);
-        sendto(sockfd, acronymMsg.c_str(), acronymMsg.length(), 0, (struct sockaddr *)&stockMarketAddr, sizeof(stockMarketAddr));
-
-
-        // start the receive thread
-        std::thread recvThread(&Bank::receiveMessage, this, sockfd);
-
-        // detach the thread to let it run in the background
-        recvThread.detach();
-        */
-    }
-
-
-    void receiveMessage() {
         while (true) {
             // wait for an incoming message
             std::string message;
             message.resize(1024); // allocate space for the received message
             struct sockaddr_in src_addr;
             socklen_t addrlen = sizeof(src_addr);
-            int nbytes = recvfrom(this->sockfd, &message[0], message.size(), 0, (struct sockaddr *) &src_addr, &addrlen);
+            int nbytes = recvfrom(this->sockfdBank, &message[0], message.size(), 0, (struct sockaddr *) &src_addr,
+                                  &addrlen);
             if (nbytes < 0) {
                 std::cerr << "Error receiving message" << std::endl;
                 break;
@@ -108,8 +127,23 @@ public:
             updateTotalValue();
             printTotalValue();
         }
+        std::cout << "End receiveMessage" << std::endl;
     }
 
+    std::string createRegisterMessage() {
+        // Set first attribute of register message as bankname (which is equal to hostname)
+        std::string regMsg = this->name + " ";
+        // Set second attribute of register message as number of stocks in portfolio
+        regMsg += std::to_string(this->portfolio.size()) + " ";
+
+        // Add all stock acronyms of portfolio to the register message
+        for (auto stock: this->portfolio) {
+            regMsg += stock->getAcronym() + " ";
+        }
+
+        std::cout << "regMes: " << regMsg << std::endl;
+        return regMsg;
+    }
 
     unsigned int getValuePortfolio() {
         return this->totalValue;
@@ -145,8 +179,7 @@ private:
     int outstandingLoans;
     unsigned int totalValue;
     std::string name;
-    int sockfd;
+    int sockfdBank, sockfdStockMarket;
 };
 
-
-#endif //BANKENSYSTEM_BANK_H
+#endif // BANKENSYSTEM_BANK_H
