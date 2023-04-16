@@ -14,20 +14,14 @@ public:
     }
 
     std::string createRandomizedStockMessage() {
-
-        float courseChangeFactor = ((float)rand()/(float)RAND_MAX) * 0.38 - 0.19;
-
-        this->price += (unsigned int)(courseChangeFactor * this->price);
-
+        float courseChangeFactor = ((float) rand() / (float) RAND_MAX) * 0.38 - 0.19;
+        this->price += (unsigned int) (courseChangeFactor * this->price);
         unsigned int stockAmount = rand() % 451 + 50;
-
         return this->acronym + " " + std::to_string(this->price) + " " + std::to_string(stockAmount);
     }
 
-
 private:
-    std::vector<std::string> addresses;
+    std::vector <std::string> registeredIPAddresses;
 };
 
-
-#endif //BANKENSYSTEM_SMSTOCK_H
+#endif // BANKENSYSTEM_SMSTOCK_H
