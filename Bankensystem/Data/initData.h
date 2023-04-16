@@ -24,7 +24,6 @@ std::vector <std::string> bankNames = {"liliBank", "softBank", "goodBank", "rick
 
 std::vector<BStock *> fillPortfolio() {
     std::cout << "Start fillPortfolio" << std::endl;
-    std::vector < SMStock * > stocksTemp = stocksInit;
     std::vector < BStock * > stocks;
     std::set<int> selectedIndices;
 
@@ -35,7 +34,7 @@ std::vector<BStock *> fillPortfolio() {
         unsigned int stockAmount = rand() % 451 + 50;
         if (selectedIndices.count(index) == 0) {
             selectedIndices.insert(index);
-            stocks.push_back(new BStock(stocksInit[index]->getAcronym(), stocksTemp[index]->getPrice(), stockAmount));
+            stocks.push_back(new BStock(stocksInit[index]->getAcronym(), stocksInit[index]->getPrice(), stockAmount));
         }
     }
 
