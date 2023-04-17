@@ -98,7 +98,7 @@ void fillMap(){
     addStock("JOI");
 }
 
-int sendMessage(std::string message) {
+int sendMessage(std::string message, std::string ip) {
     int sockfd, n;
     socklen_t len;
     char buffer[BUF_SIZE];
@@ -116,10 +116,12 @@ int sendMessage(std::string message) {
     // Filling server information
     servaddr.sin_family = AF_INET;
     servaddr.sin_port = htons(8080);
-    servaddr.sin_addr.s_addr = INADDR_ANY; // listen to all network adresses
+    servaddr.sin_addr.s_addr = inet_addr(ip.c_str());
 
     // Send message to server
     sendto(sockfd, message.c_str(), message.length(), MSG_CONFIRM, (const struct sockaddr *) &servaddr, sizeof(servaddr));
+
+    std::cout << "Send message to: " << ip << std::endl;
 
     close(sockfd);
 
@@ -162,23 +164,31 @@ void startSubscribeServer(){
         //buffer[n] = '\0';
         if (n>0){
             std::cout << "Received message: " << message << std::endl;
-
             // split the message into its parts
             std::istringstream iss(message);
-            std::string acronym, ip;
-            iss >> acronym >> ip;
+            std::string bankname, type;
+            int numberStocks = 0;
+            iss >> bankname >> type >> numberStocks;
 
-            if(acronym == "stop"){
+            if(type == "sub"){
+                for (int i = 0; i < numberStocks; ++i) {
+                    std::string tmpAcronym;
+                    iss >> tmpAcronym;
+                    mu.lock();
+                    addSubscriber(tmpAcronym, inet_ntoa(cliaddr.sin_addr)); //could use cliaddr.sin_addr
+                    mu.unlock();
+                }
+                std::cout << "Subscriber list changed:" << std::endl;
+                printMap();
+            } else if(type == "desub"){
+                //TO DO desub function
+                std::cout << "Subscriber list changed:" << std::endl;
+                printMap();
+            } else if(type == "stop"){
                 return;
+            } else{
+                std::cout << "No valid message type" << std::endl;
             }
-
-            mu.lock();
-            addSubscriber(acronym, inet_ntoa(cliaddr.sin_addr)); //could use cliaddr.sin_addr
-            mu.unlock();
-
-            std::cout << "Subscriber list changed:" << std::endl;
-
-            printMap();
         }
     }
 
@@ -205,7 +215,7 @@ void transactionThread(){
         std::vector<std::string> addresses = getSubscriber(acronym);
 
         for (int i = 0; i < addresses.size(); ++i) {
-            sendMessage(addresses[i]);
+            sendMessage(message, addresses[i]);
             std::cout << "Send message to: " << addresses[i] << std::endl;
         }
         mu.unlock();
