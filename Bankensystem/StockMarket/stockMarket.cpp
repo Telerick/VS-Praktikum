@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <sstream>
+#include <netdb.h>
 #include "StockMarket.h"
 
 #ifndef MSG_CONFIRM
