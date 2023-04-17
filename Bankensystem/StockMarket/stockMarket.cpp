@@ -10,6 +10,7 @@
 #include <sstream>
 #include <netdb.h>
 #include "StockMarket.h"
+#include "../Data/initData.h"
 
 #ifndef MSG_CONFIRM
 #define MSG_CONFIRM 0x800
@@ -89,13 +90,9 @@ void printMap(){
 }
 
 void fillMap(){
-    addStock("LSFT");
-    addStock("TC19");
-    addStock("MNSW");
-    addStock("MFC");
-    addStock("GDAG");
-    addStock("TB2");
-    addStock("JOI");
+    for (int i = 0; i < stocksInit.size(); ++i) {
+        addStock(stocksInit[i]->getAcronym());
+    }
 }
 
 int sendMessage(std::string message, std::string ip) {
