@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <sstream>
+#include <netdb.h>
 #include "StockMarket.h"
 
 #ifndef MSG_CONFIRM
@@ -209,7 +210,7 @@ void transactionThread(){
         }
         mu.unlock();
 
-        std::this_thread::sleep_until(std::chrono::system_clock::now() + std::chrono::seconds(5));
+        std::this_thread::sleep_until(std::chrono::system_clock::now() + std::chrono::seconds(2));
     }
 }
 
