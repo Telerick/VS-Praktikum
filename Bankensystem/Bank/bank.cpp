@@ -12,6 +12,7 @@ int main() {
     unsigned int seed = nameHash(containerName);
     srand(seed);
     Bank bank(fillPortfolio(), containerName);
+    bank.registerToStockMarket();
     bank.receiveMessage();
     std::cout << "OUTSIDE receiveMessage()" << std::endl;
 };
