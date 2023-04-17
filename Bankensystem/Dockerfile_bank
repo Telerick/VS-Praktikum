@@ -13,7 +13,7 @@ COPY /Bank/ /app/Bank
 
 
 # Compile the C++ program
-RUN g++ -std=c++17 /app/Bank/bank.cpp -o /app/Bank/bank
+RUN g++ -std=c++17 -pthread /app/Bank/bank.cpp -o /app/Bank/bank
 
 # Set the command to run when the container starts
 CMD ["./Bank/bank"]

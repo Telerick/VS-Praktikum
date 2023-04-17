@@ -13,13 +13,15 @@ services:
     networks:
       mynet:
         ipv4_address: 172.20.0.3
+    depends_on:
+      - stock-market
   bank2:
-    container_name: bankTill
-    build: 
+    container_name: bankDonLangen
+    build:
       context: .
       dockerfile: Dockerfile_bank
     environment:
-      - CONTAINER_NAME=bankTill
+      - CONTAINER_NAME=bankDonLangen
     depends_on:
       - bank1
     networks:
@@ -27,12 +29,13 @@ services:
         ipv4_address: 172.20.0.4
   bank3:
     container_name: bankLeon
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile_bank
     environment:
       - CONTAINER_NAME=bankLeon
     depends_on:
+      - stock-market
       - bank1
       - bank2
     networks:
@@ -40,12 +43,13 @@ services:
         ipv4_address: 172.20.0.5
   bank4:
     container_name: bankTobi
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile_bank
     environment:
       - CONTAINER_NAME=bankTobi
     depends_on:
+      - stock-market
       - bank1
       - bank2
       - bank3
