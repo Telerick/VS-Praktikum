@@ -18,7 +18,7 @@ RUN set -eux
 RUN dir -s
 
 # Compile the C++ program
-RUN g++ -std=c++17 /app/StockMarket/stockMarket.cpp -o /app/StockMarket/stockMarket
+RUN g++ -std=c++17 -pthread /app/StockMarket/stockMarket.cpp -o /app/StockMarket/stockMarket
 
 # Set the command to run when the container starts
 CMD ["./StockMarket/stockMarket"]
