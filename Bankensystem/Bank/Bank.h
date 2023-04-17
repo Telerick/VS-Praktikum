@@ -34,17 +34,6 @@ public:
     Bank(std::vector<BStock *> stocks, std::string name)
             : portfolio(stocks), cashReserves(100000), outstandingLoans(30000), totalValue(0), name(name) {
         std::cout << "Start Constructor Bank" << std::endl;
-        // Creating socket file descriptor for bank
-        if ((this->sockfdBank = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-            std::cerr << "Error: socket creation failed" << std::endl;
-            exit(EXIT_FAILURE);
-        }
-
-        // Creating socket file descriptor for stock market
-        if ((this->sockfdStockMarket = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-            std::cerr << "Error: socket creation failed" << std::endl;
-            exit(EXIT_FAILURE);
-        }
 
         updateTotalValue();
         printBankInformation();
@@ -54,6 +43,14 @@ public:
 
     void registerToStockMarket() {
         std::cout << "Start registerToStockMarket" << std::endl;
+
+        int sockfdStockMarket;
+        // Creating socket file descriptor for stock market
+        if ((sockfdStockMarket = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+            std::cerr << "Error: socket creation failed" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+
         sockaddr_in stockMarketAddr;
 
         const char *hostname = "stockMarket";
@@ -69,11 +66,7 @@ public:
         stockMarketAddr.sin_addr = *((struct in_addr *) stockMarket->h_addr);
         stockMarketAddr.sin_port = htons(UDP_PORT);
 
-        // Bind the socket with the stockMarket address
-        if (bind(sockfdStockMarket, (const struct sockaddr *) &stockMarketAddr, sizeof(stockMarketAddr)) < 0) {
-            std::cerr << "bind failed" << std::endl;
-            exit(EXIT_FAILURE);
-        }
+        std::cout << "Registering to Stock Market with IP: " << inet_ntoa(stockMarketAddr.sin_addr) << std::endl;
 
         std::string regMsg = createRegisterMessage();
         // Send a registration message with hostname and all stock acronyms to the stockMarket
@@ -85,6 +78,14 @@ public:
 
     void receiveMessage() {
         std::cout << "Start receiveMessage" << std::endl;
+
+        // Creating socket file descriptor for bank
+        int sockfdBank;
+        if ((sockfdBank = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+            std::cerr << "Error: socket creation failed" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+
 
         sockaddr_in bankAddr;
         // Filling bank information
@@ -107,9 +108,8 @@ public:
             // wait for an incoming message
             std::string message;
             message.resize(1024); // allocate space for the received message
-            struct sockaddr_in src_addr;
-            socklen_t addrlen = sizeof(src_addr);
-            int nbytes = recvfrom(this->sockfdBank, &message[0], message.size(), 0, (struct sockaddr *) &src_addr,
+            socklen_t addrlen = sizeof(bankAddr);
+            int nbytes = recvfrom(sockfdBank, &message[0], message.size(), 0, (struct sockaddr *) &bankAddr,
                                   &addrlen);
             if (nbytes < 0) {
                 std::cerr << "Error receiving message" << std::endl;
@@ -123,7 +123,7 @@ public:
             iss >> acronym >> price >> amount;
 
             // print the received message parts and source address
-            std::cout << "Received " << nbytes << " bytes from " << inet_ntoa(src_addr.sin_addr) << std::endl;
+            std::cout << "Received " << nbytes << " bytes from " << inet_ntoa(bankAddr.sin_addr) << std::endl;
             std::cout << "Acronym: " << acronym << std::endl;
             std::cout << "Price: " << price << std::endl;
             std::cout << "Amount: " << amount << std::endl;
@@ -140,7 +140,11 @@ public:
     std::string createRegisterMessage() {
         // Set first attribute of register message as bankname (which is equal to hostname)
         std::string regMsg = this->name + " ";
-        // Set second attribute of register message as number of stocks in portfolio
+
+        // Set second argument as ttype (sub- or desubscribe // "sub" "desub")
+        regMsg += "sub ";
+
+        // Set third attribute of register message as number of stocks in portfolio
         regMsg += std::to_string(this->portfolio.size()) + " ";
 
         // Add all stock acronyms of portfolio to the register message
@@ -186,8 +190,8 @@ public:
 
     void printPortfolioData() {
         for (int i = 0; i < this->portfolio.size(); i++) {
-            std::cout << i+1 << " .Stock: " + this->portfolio[i]->getAcronym() << "\t" << "price: "
-                      << this->portfolio[i]->getPrice() << "€" <<"\t" << "Amount: " << this->portfolio[i]->getAmount()
+            std::cout << i + 1 << " .Stock: " + this->portfolio[i]->getAcronym() << "\t" << "price: "
+                      << this->portfolio[i]->getPrice() << "€" << "\t" << "Amount: " << this->portfolio[i]->getAmount()
                       << std::endl;
         }
     }
@@ -206,7 +210,6 @@ private:
     int outstandingLoans;
     unsigned int totalValue;
     std::string name;
-    int sockfdBank, sockfdStockMarket;
 };
 
 #endif // BANKENSYSTEM_BANK_H
