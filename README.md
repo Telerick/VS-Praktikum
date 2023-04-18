@@ -130,6 +130,7 @@ Repo for VS
 
     Hier ist jede Bank sowohl ein Publisher als auch ein Subscriber von Nachrichten.
     Zuerst sollen die Banken regelmäßig Ihre Gesamtwerte veröffentlichen. Die andere Banken sollen diese Informationen verwenden, um Entscheidungen zu      treffen.
+    
     Besonders wichtig hier ist die Entscheidung, ob eine Bank eine andere Bank retten soll, wie in Aufgabe 3 schon simuliert wurde. Es soll also    vorkommen, dass eine Bank nur durch mehrere andere Banken gerettet werden kann, weil keine andere Bank bereit ist, sie alleine zu retten.
 Die Rettung erfolgt per angepasste Two Phase Commit (2PC). Das heißt, eine Menge Banken werden gefragt, ob sie bereit sind, eine Menge Geld an die gefährdeten Bank zu überweisen. Erst wenn ausreichend viele Banken zustimmen, werden die Überweisungen bestätigt. Vgl. die Beschreibung von 2PC in der Vorlesung. Hinweis: Der 2PC Algorithmus setzt voraus, dass eine Komponente den 2PCProzess (d.h. die Wahl) koordiniert. Sie sollen selbst definieren, wie entschieden wird, welche Bank der Koordinator ist. 
 
@@ -138,6 +139,6 @@ der neuen MOM-Schnittstelle feststellen.
 
     Definieren Sie auch, wie die Performanz der Schnittstelle gemessen werden kann. Wiederholen Sie die Performance-Tests aus Aufgabe 1, 2 und 3 und vergleichen Sie die Testergebnisse, um festzustellen, wie die Performance aller Schnittstellen leidet, wenn gleichzeitig die MOM-Schnittstelle unter Last steht. 
 
-Dokumentieren Sie die dabei alle gewonnene Erkenntnisse in Ihrem Messprotokoll und geben Sie es im Moodle ab.
+    Dokumentieren Sie die dabei alle gewonnene Erkenntnisse in Ihrem Messprotokoll und geben Sie es im Moodle ab.
 
     *Für den Bonus könnte ein Konsens-Algorithmus hierfür verwendet werden, z.B. der Raft Algorithmus oder ein Paxos Algorithmus.*
