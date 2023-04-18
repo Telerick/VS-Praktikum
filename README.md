@@ -1,7 +1,16 @@
 # VS-Praktikum
 Repo for VS
+## Hinweise zu Docker
 
-#1 Aufgabenstellung
+- **Starten der Docker-Compose.yml-Datei**
+    <pre>
+    `docker-compose up --build`
+    </pre>
+
+
+## Aufgabenstellung
+
+    ![Das Gesamtsystem](./pictures/gesamtsystem.png)
 
 - **Aufgabe 1 - UDP Sockets**
     
@@ -14,6 +23,8 @@ Repo for VS
     Jede Bank hält eine simulierte Menge Wertpapiere, deren Wert sich ständig ändert. 
     
     Die Börse liefern einen Strom von Nachrichten, und zwar per UDP.
+    
+    ![Aufgabe 1: (UDP).](./pictures/A1.png)
     
     Eine Nachricht besteht aus folgenden Komponenten: der Kürzel des Wertpapiers, 
     das soeben gehandelt wurde, die Stückzahl und der Preis. 
@@ -58,7 +69,7 @@ Repo for VS
     
     Diese Schnittstellen sind in Abbildung 3 dargestellt.
     
-    ![Bildschirm­foto 2023-04-12 um 11.13.18.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/c3a6c93f-c38d-4da5-96f1-c4b214ad8992/Bildschirmfoto_2023-04-12_um_11.13.18.png)
+    ![Aufgabe 2: (HTTP)](./pictures/A2.png)
     
     Die neuen Daten, die eingegeben werden können, sollen Sie selbst definieren.
     
@@ -88,7 +99,7 @@ Repo for VS
     
     Bis jetzt wurden die Kommunikation zwischen Börsen und Banken in Aufgabe 1 simuliert, und in Aufgabe 2 die Kommunikation zwischen einer Bank und ihrer Mitarbeiter:innen simuliert. 
     
-    ![Bildschirm­foto 2023-04-18 um 13.00.36.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/e4c72521-b82b-4fa9-a687-1fd7bcfbe7e9/Bildschirmfoto_2023-04-18_um_13.00.36.png)
+    ![Aufgabe 3: (Remote Procedure Calls (RPC)).](./pictures/A3.png)
     
     Nun sollen die Banken miteinander kommunizieren können, wie in Abbildung 4 zu sehen ist. Die Banken sollen mittels Remote Procedure Calls (RCP) einander Dienste anbieten und diese Dienste in Anspruch nehmen. Dafür ist Apache Thrift zu empfehlen, aber auch Google’s gRPC darf verwendet werden. Andere RPC-FGrameworks müssen beim Dozenten angefragt werden. 
     
@@ -126,7 +137,7 @@ Repo for VS
     Endlich sind wir soweit, dass wir die Rettung einer gefährdeten Bank durch einer Gruppe von Banken simulieren können.
     Hier sollen Sie Message-Oriented-Middleware (MOM) wie z.B. MQTT einsetzen.
 
-    ![Bildschirm­foto 2023-04-18 um 13.09.55.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/4b828dfc-06f4-4694-8096-      b220ab447b6e/Bildschirmfoto_2023-04-18_um_13.09.55.png)
+    ![Aufgabe 4: Message Oriented Middlware (MOM))z.B. MQTT](./pictures/A4.png)
 
     Hier ist jede Bank sowohl ein Publisher als auch ein Subscriber von Nachrichten.
     Zuerst sollen die Banken regelmäßig Ihre Gesamtwerte veröffentlichen. Die andere Banken sollen diese Informationen verwenden, um Entscheidungen zu      treffen.
