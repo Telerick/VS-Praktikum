@@ -73,11 +73,11 @@ public:
         sendto(sockfdStockMarket, regMsg.c_str(), regMsg.length(), 0, (struct sockaddr *) &stockMarketAddr,
                sizeof(stockMarketAddr));
 
-        std::cout << "End registerToStockMarket" << std::endl;
+        //std::cout << "End registerToStockMarket" << std::endl;
     }
 
     void receiveMessage() {
-        std::cout << "Start receiveMessage" << std::endl;
+        //std::cout << "Start receiveMessage" << std::endl;
 
         // Creating socket file descriptor for bank
         int sockfdBank;
@@ -101,10 +101,10 @@ public:
             exit(EXIT_FAILURE);
         }
 
-        std::cout << this->name << " ready for receiving messages" << std::endl;
+        //std::cout << this->name << " ready for receiving messages" << std::endl;
 
         while (true) {
-            std::cout << "Before receive" << std::endl;
+            //std::cout << "Before receive" << std::endl;
             // wait for an incoming message
             std::string message;
             message.resize(1024); // allocate space for the received message
@@ -115,7 +115,7 @@ public:
                 std::cerr << "Error receiving message" << std::endl;
                 break;
             }
-            std::cout << "After receive" << std::endl;
+            //std::cout << "After receive" << std::endl;
             // split the message into its parts
             std::istringstream iss(message);
             std::string acronym;
@@ -130,11 +130,11 @@ public:
 
             updateStock(acronym, price);
             updateTotalValue();
-            printTotalValue();
-            std::cout << "INSIDE receiveMessage()" << std::endl;
+            //printTotalValue();
+            //std::cout << "INSIDE receiveMessage()" << std::endl;
 
         }
-        std::cout << "End receiveMessage" << std::endl;
+       // std::cout << "End receiveMessage" << std::endl;
     }
 
     std::string createRegisterMessage() {

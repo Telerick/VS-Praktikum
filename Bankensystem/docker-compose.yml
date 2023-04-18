@@ -23,7 +23,7 @@ services:
     environment:
       - CONTAINER_NAME=bankDonLangen
     depends_on:
-      - bank1
+      - stock-market
     networks:
       mynet:
         ipv4_address: 172.20.0.4
@@ -36,8 +36,6 @@ services:
       - CONTAINER_NAME=bankLeon
     depends_on:
       - stock-market
-      - bank1
-      - bank2
     networks:
       mynet:
         ipv4_address: 172.20.0.5
@@ -50,9 +48,6 @@ services:
       - CONTAINER_NAME=bankTobi
     depends_on:
       - stock-market
-      - bank1
-      - bank2
-      - bank3
     networks:
       mynet:
         ipv4_address: 172.20.0.6
@@ -63,11 +58,6 @@ services:
       dockerfile: Dockerfile_stockMarket
     environment:
       - CONTAINER_NAME=stockMarket
-    depends_on:
-      - bank1
-      - bank2
-      - bank3
-      - bank4
     networks:
       mynet:
         ipv4_address: 172.20.0.2
