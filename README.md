@@ -4,12 +4,12 @@ Repo for VS
 
 - **Starten der Docker-Compose.yml-Datei**
     <pre>
-    `docker-compose up --build`
+    docker-compose up --build
     </pre>
 
 
 ## Aufgabenstellung
-
+- **Das Gesamtsystem**
     ![Das Gesamtsystem](./pictures/gesamtsystem.png)
 
 - **Aufgabe 1 - UDP Sockets**
