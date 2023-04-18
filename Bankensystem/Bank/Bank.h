@@ -33,20 +33,20 @@ class Bank {
 public:
     Bank(std::vector<BStock *> stocks, std::string name)
             : portfolio(stocks), cashReserves(100000), outstandingLoans(30000), totalValue(0), name(name) {
-        std::cout << "Start Constructor Bank" << std::endl;
+        std::cout << "Start Constructor Bank" << this->name << std::endl;
 
         updateTotalValue();
         printBankInformation();
 
-        std::cout << "End Constructor Bank" << std::endl;
+        std::cout << "End Constructor Bank" << this->name << std::endl;
     }
 
     void registerToStockMarket() {
-        std::cout << "Start registerToStockMarket" << std::endl;
+        std::cout << "Start registration process for " << this->name << std::endl;
 
-        int sockfdStockMarket;
+        int sockfd;
         // Creating socket file descriptor for stock market
-        if ((sockfdStockMarket = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+        if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
             std::cerr << "Error: socket creation failed" << std::endl;
             exit(EXIT_FAILURE);
         }
@@ -70,18 +70,18 @@ public:
 
         std::string regMsg = createRegisterMessage();
         // Send a registration message with hostname and all stock acronyms to the stockMarket
-        sendto(sockfdStockMarket, regMsg.c_str(), regMsg.length(), 0, (struct sockaddr *) &stockMarketAddr,
+        sendto(sockfd, regMsg.c_str(), regMsg.length(), 0, (struct sockaddr *) &stockMarketAddr,
                sizeof(stockMarketAddr));
 
-        //std::cout << "End registerToStockMarket" << std::endl;
+        std::cout << "Registration sent" << std::endl;
     }
 
     void receiveMessage() {
-        //std::cout << "Start receiveMessage" << std::endl;
+        std::cout << "Start receiveMessage" << std::endl;
 
         // Creating socket file descriptor for bank
-        int sockfdBank;
-        if ((sockfdBank = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+        int sockfd;
+        if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
             std::cerr << "Error: socket creation failed" << std::endl;
             exit(EXIT_FAILURE);
         }
@@ -95,13 +95,13 @@ public:
         bankAddr.sin_port = htons(UDP_PORT);
 
         // Bind the socket with the bank address
-        if (bind(sockfdBank, (const struct sockaddr *) &bankAddr,
+        if (bind(sockfd, (const struct sockaddr *) &bankAddr,
                  sizeof(bankAddr)) < 0) {
             std::cerr << "Bind failed" << std::endl;
             exit(EXIT_FAILURE);
         }
 
-        //std::cout << this->name << " ready for receiving messages" << std::endl;
+        std::cout << this->name << " ready for receiving messages" << std::endl;
 
         while (true) {
             //std::cout << "Before receive" << std::endl;
@@ -109,7 +109,7 @@ public:
             std::string message;
             message.resize(1024); // allocate space for the received message
             socklen_t addrlen = sizeof(bankAddr);
-            int nbytes = recvfrom(sockfdBank, &message[0], message.size(), 0, (struct sockaddr *) &bankAddr,
+            int nbytes = recvfrom(sockfd, &message[0], message.size(), 0, (struct sockaddr *) &bankAddr,
                                   &addrlen);
             if (nbytes < 0) {
                 std::cerr << "Error receiving message" << std::endl;
@@ -123,18 +123,18 @@ public:
             iss >> acronym >> price >> amount;
 
             // print the received message parts and source address
-            std::cout << "Received " << nbytes << " bytes from " << inet_ntoa(bankAddr.sin_addr) << std::endl;
-            std::cout << "Acronym: " << acronym << std::endl;
-            std::cout << "Price: " << price << std::endl;
+            std::cout << this->name << " received " << nbytes << " bytes from "
+                      << inet_ntoa(bankAddr.sin_addr) << std::endl;
+            std::cout << "TRANSACTION ->\tAcronym: " << acronym << "\t";
+            std::cout << "Price: " << price << "\t";
             std::cout << "Amount: " << amount << std::endl;
 
+
             updateStock(acronym, price);
-            updateTotalValue();
-            //printTotalValue();
             //std::cout << "INSIDE receiveMessage()" << std::endl;
 
         }
-       // std::cout << "End receiveMessage" << std::endl;
+        //std::cout << "End receiveMessage" << std::endl;
     }
 
     std::string createRegisterMessage() {
@@ -152,7 +152,7 @@ public:
             regMsg += stock->getAcronym() + " ";
         }
 
-        std::cout << "regMes: " << regMsg << std::endl;
+        std::cout << "Registration message: " << regMsg << std::endl;
         return regMsg;
     }
 
@@ -161,10 +161,11 @@ public:
     }
 
     void updateStock(const std::string &acronym, unsigned int price) {
+        printTotalValue();
         for (auto &i: this->portfolio) {
             if (i->getAcronym() == acronym) {
                 i->setPrice(price);
-                std::cout << "Stock price updated!" << std::endl;
+                std::cout << "Stock price for " << i->getAcronym() << " updated!" << std::endl;
                 updateTotalValue();
                 printTotalValue();
                 return;
