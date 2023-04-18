@@ -25,28 +25,28 @@
 //
 // global variables
 //
-std::map<std::string, std::vector<std::string> > map;
+std::map <std::string, std::vector<std::string>> map;
 
 std::mutex mu;
 
 //
 // functions
 //
-void addStock(std::string stock){
-    if(map.find(stock) != map.end()){
+void addStock(std::string stock) {
+    if (map.find(stock) != map.end()) {
         return; //if stock is already a key of the map
     }
-    std::vector<std::string> v1;
+    std::vector <std::string> v1;
     map[stock] = v1;
 }
 
-void addSubscriber(std::string stock, std::string ip){
-    if(map.find(stock) == map.end()){
+void addSubscriber(std::string stock, std::string ip) {
+    if (map.find(stock) == map.end()) {
         return; //if stock is not key of the map
     }
 
     for (int i = 0; i < map[stock].size(); ++i) {
-        if(map[stock][i] == ip){
+        if (map[stock][i] == ip) {
             return;
         }
     }
@@ -54,42 +54,42 @@ void addSubscriber(std::string stock, std::string ip){
     map[stock].push_back(ip);
 }
 
-void removeSubscriber(std::string stock, std::string ip){
-    if(map.find(stock) == map.end()){
+void removeSubscriber(std::string stock, std::string ip) {
+    if (map.find(stock) == map.end()) {
         return; //if stock is not key of the map
     }
 
     for (int i = 0; i < map[stock].size(); ++i) {
-        if(map[stock][i] == ip){
-            map[stock].erase(map[stock].begin()+i);
+        if (map[stock][i] == ip) {
+            map[stock].erase(map[stock].begin() + i);
             return;
         }
     }
 
 }
 
-std::vector<std::string> getSubscriber(std::string stock){
-    if(map.find(stock) == map.end()){
+std::vector <std::string> getSubscriber(std::string stock) {
+    if (map.find(stock) == map.end()) {
         return std::vector<std::string>(); //if stock is not key of the map
     }
     return map[stock];
 }
 
-void printVector(std::vector<std::string> v){
-    for (const auto & i : v) {
+void printVector(std::vector <std::string> v) {
+    for (const auto &i: v) {
         std::cout << i << ", ";
     }
 }
 
-void printMap(){
-    for (const auto& [key, value] : map){
+void printMap() {
+    for (const auto &[key, value]: map) {
         std::cout << '[' << key << "] = ";
         printVector(value);
         std::cout << ";" << std::endl;
     }
 }
 
-void fillMap(){
+void fillMap() {
     for (int i = 0; i < stocksInit.size(); ++i) {
         addStock(stocksInit[i]->getAcronym());
     }
@@ -116,7 +116,8 @@ int sendMessage(std::string message, std::string ip) {
     servaddr.sin_addr.s_addr = inet_addr(ip.c_str());
 
     // Send message to server
-    sendto(sockfd, message.c_str(), message.length(), MSG_CONFIRM, (const struct sockaddr *) &servaddr, sizeof(servaddr));
+    sendto(sockfd, message.c_str(), message.length(), MSG_CONFIRM, (const struct sockaddr *) &servaddr,
+           sizeof(servaddr));
 
     std::cout << "Send message to: " << ip << std::endl;
 
@@ -125,7 +126,7 @@ int sendMessage(std::string message, std::string ip) {
     return 0;
 }
 
-void startSubscribeServer(){
+void startSubscribeServer() {
     int sockfd;
     struct sockaddr_in servaddr;
 
@@ -149,7 +150,7 @@ void startSubscribeServer(){
         return;
     }
 
-    while(true){
+    while (true) {
         std::string message;
         message.resize(BUF_SIZE);
         struct sockaddr_in cliaddr;
@@ -159,7 +160,7 @@ void startSubscribeServer(){
         socklen_t len = sizeof(cliaddr);
         int n = recvfrom(sockfd, &message[0], message.size(), MSG_WAITALL, (struct sockaddr *) &cliaddr, &len);
         //buffer[n] = '\0';
-        if (n>0){
+        if (n > 0) {
             std::cout << "Received message: " << message << std::endl;
             // split the message into its parts
             std::istringstream iss(message);
@@ -167,7 +168,7 @@ void startSubscribeServer(){
             int numberStocks = 0;
             iss >> bankname >> type >> numberStocks;
 
-            if(type == "sub"){
+            if (type == "sub") {
                 for (int i = 0; i < numberStocks; ++i) {
                     std::string tmpAcronym;
                     iss >> tmpAcronym;
@@ -177,13 +178,13 @@ void startSubscribeServer(){
                 }
                 std::cout << "Subscriber list changed:" << std::endl;
                 printMap();
-            } else if(type == "desub"){
+            } else if (type == "desub") {
                 //TO DO desub function
                 std::cout << "Subscriber list changed:" << std::endl;
                 printMap();
-            } else if(type == "stop"){
+            } else if (type == "stop") {
                 return;
-            } else{
+            } else {
                 std::cout << "No valid message type" << std::endl;
             }
         }
@@ -192,12 +193,12 @@ void startSubscribeServer(){
     close(sockfd);
 }
 
-void transactionThread(){
+void transactionThread() {
     StockMarket stockMarket1;
     stockMarket1.initData();
     stockMarket1.printStockMarket();
 
-    while(true){
+    while (true) {
         std::string message = stockMarket1.generateTransaction();
 
         // split the message into its parts
@@ -209,7 +210,7 @@ void transactionThread(){
         std::cout << "New generated transaction: " << message << std::endl;
 
         mu.lock();
-        std::vector<std::string> addresses = getSubscriber(acronym);
+        std::vector <std::string> addresses = getSubscriber(acronym);
 
         for (int i = 0; i < addresses.size(); ++i) {
             sendMessage(message, addresses[i]);
@@ -220,139 +221,6 @@ void transactionThread(){
         std::this_thread::sleep_until(std::chrono::system_clock::now() + std::chrono::seconds(5));
     }
 }
-
-//
-// olf functions (may delete later)
-//
-int startServer() {
-    int sockfd, n;
-    socklen_t len;
-    char buffer[BUF_SIZE];
-    struct sockaddr_in servaddr, cliaddr;
-    struct addrinfo hints, *res;
-
-    // Creating socket file descriptor fd
-    sockfd = socket(AF_INET, SOCK_DGRAM, 0);    // socket(domain, type, protocol)
-    if (sockfd < 0) {
-        std::cerr << "Error creating socket" << std::endl;
-        return -1;
-    }
-
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_DGRAM;
-
-    // Resolve hostname to IP address
-    int status = getaddrinfo("bankErik", "8080", &hints, &res);
-    if (status != 0) {
-        std::cerr << "Error resolving hostname: " << gai_strerror(status) << std::endl;
-        return -1;
-    }
-
-    memset(&servaddr, 0, sizeof(servaddr));
-    memcpy(&servaddr, res->ai_addr, res->ai_addrlen);
-    freeaddrinfo(res);
-
-    // // Filling server information
-    // servaddr.sin_family = AF_INET;
-    // servaddr.sin_port = htons(8080);
-    // servaddr.sin_addr.s_addr = INADDR_ANY;  // ALLE VERFÜGBARE SCHNITTSTELLE
-
-    // Bind the socket with the server address
-    if (::bind(sockfd, (const struct sockaddr *) &servaddr, sizeof(servaddr)) < 0) {
-        std::cerr << "Bind failed" << std::endl;
-        return -1;
-    }
-
-    // Wait for "Hello" message from client
-    len = sizeof(cliaddr);
-    n = recvfrom(sockfd, (char *) buffer, BUF_SIZE, MSG_WAITALL, (struct sockaddr *) &cliaddr, &len);
-    buffer[n] = '\0';
-    std::cout << "Server: " << buffer << std::endl;
-
-    // Send "Hello" message to client
-    const char *hello = "SERVERMESSAGE: Hello, Mario. It's me Bowser. I have Peach, come and get her";
-
-    sendto(sockfd, hello, strlen(hello), MSG_CONFIRM, (const struct sockaddr *) &cliaddr, len);
-    std::cout << "Server: Hello message sent to client" << std::endl;
-
-    close(sockfd);
-
-    return 0;
-}
-
-int sendMessageOld(std::string message) {
-    int sockfd, n;
-    socklen_t len;
-    char buffer[BUF_SIZE];
-    struct sockaddr_in servaddr;
-
-    // Creating socket file descriptor
-    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sockfd < 0) {
-        std::cerr << "Error creating socket" << std::endl;
-        return -1;
-    }
-
-    memset(&servaddr, 0, sizeof(servaddr));
-
-    // Filling server information
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_port = htons(8080);
-    servaddr.sin_addr.s_addr = INADDR_ANY; // listen to all network adresses
-
-    // Send message to server
-    sendto(sockfd, message.c_str(), message.length(), MSG_CONFIRM, (const struct sockaddr *) &servaddr, sizeof(servaddr));
-    std::cout << message << std::endl;
-
-    close(sockfd);
-
-    return 0;
-}
-
-int sendMessageOld2(std::string message) {
-    int sockfd, n;
-    socklen_t len;
-    char buffer[BUF_SIZE];
-    struct sockaddr_in servaddr;
-    struct addrinfo hints, *res;
-
-    // Creating socket file descriptor
-    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sockfd < 0) {
-        std::cerr << "Error creating socket" << std::endl;
-        return -1;
-    }
-
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_DGRAM;
-
-    // Resolve hostname to IP address
-    int status = getaddrinfo("bankErik", "8080", &hints, &res);
-    if (status != 0) {
-        std::cerr << "Error resolving hostname: " << gai_strerror(status) << std::endl;
-        return -1;
-    }
-
-    memset(&servaddr, 0, sizeof(servaddr));
-    memcpy(&servaddr, res->ai_addr, res->ai_addrlen);
-    freeaddrinfo(res);
-
-    sendto(sockfd, message.c_str(), message.length(), MSG_CONFIRM, (const struct sockaddr *) &servaddr, sizeof(servaddr));
-
-
-    // Wait for "Hello" message from server
-    len = sizeof(servaddr);
-    n = recvfrom(sockfd, (char *)buffer, BUF_SIZE, MSG_WAITALL, (struct sockaddr *) &servaddr, &len);
-    buffer[n] = '\0';
-    std::cout << "Client : " << buffer << std::endl;
-
-    close(sockfd);
-
-    return 0;
-}
-
 
 int main() {
     srand(time(0)); //seed for random numbers
