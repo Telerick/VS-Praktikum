@@ -1,6 +1,16 @@
 version: '3'
 
 services:
+  stock-market:
+    container_name: stockMarket
+    build:
+      context: .
+      dockerfile: Dockerfile_stockMarket
+    environment:
+      - CONTAINER_NAME=stockMarket
+    networks:
+      mynet:
+        ipv4_address: 172.20.0.2
   bank1:
     container_name: bankErik
     build: 
@@ -24,6 +34,7 @@ services:
       - CONTAINER_NAME=bankDonLangen
     depends_on:
       - stock-market
+      - bank1
     networks:
       mynet:
         ipv4_address: 172.20.0.4
@@ -36,6 +47,8 @@ services:
       - CONTAINER_NAME=bankLeon
     depends_on:
       - stock-market
+      - bank1
+      - bank2
     networks:
       mynet:
         ipv4_address: 172.20.0.5
@@ -48,19 +61,12 @@ services:
       - CONTAINER_NAME=bankTobi
     depends_on:
       - stock-market
+      - bank1
+      - bank2
+      - bank3
     networks:
       mynet:
         ipv4_address: 172.20.0.6
-  stock-market:
-    container_name: stockMarket
-    build:
-      context: .
-      dockerfile: Dockerfile_stockMarket
-    environment:
-      - CONTAINER_NAME=stockMarket
-    networks:
-      mynet:
-        ipv4_address: 172.20.0.2
 networks:
   mynet:
     ipam:
