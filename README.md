@@ -122,3 +122,22 @@ Repo for VS
     *Für den Bonus gibt es hier verschiedene Möglichkeiten. Zum Beispiel, eine wirklich gute, wohl überlegte RPC-Schnittstelle wäre geeignet. Auch gut wäre eine beeindruckende Simulation samt Aufzeichnungen, die eine Analyse ermöglichen. Besprechen Sie Ihre Pläne in jedem Fall mit Ihrem Dozent ab.*
     
 - **Aufgabe 4 - Message-Oriented-Middleware (MOM)**
+
+    Endlich sind wir soweit, dass wir die Rettung einer gefährdeten Bank durch einer Gruppe von Banken simulieren können.
+Hier sollen Sie Message-Oriented-Middleware (MOM) wie z.B. MQTT einsetzen.
+
+![Bildschirm­foto 2023-04-18 um 13.09.55.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/4b828dfc-06f4-4694-8096-b220ab447b6e/Bildschirmfoto_2023-04-18_um_13.09.55.png)
+
+Hier ist jede Bank sowohl ein Publisher als auch ein Subscriber von Nachrichten.
+Zuerst sollen die Banken regelmäßig Ihre Gesamtwerte veröffentlichen. Die andere Banken sollen diese Informationen verwenden, um Entscheidungen zu treffen.
+Besonders wichtig hier ist die Entscheidung, ob eine Bank eine andere Bank retten soll, wie in Aufgabe 3 schon simuliert wurde. Es soll also vorkommen, dass eine Bank nur durch mehrere andere Banken gerettet werden kann, weil keine andere Bank bereit ist, sie alleine zu retten.
+Die Rettung erfolgt per angepasste Two Phase Commit (2PC). Das heißt, eine Menge Banken werden gefragt, ob sie bereit sind, eine Menge Geld an die gefährdeten Bank zu überweisen. Erst wenn ausreichend viele Banken zustimmen, werden die Überweisungen bestätigt. Vgl. die Beschreibung von 2PC in der Vorlesung. Hinweis: Der 2PC Algorithmus setzt voraus, dass eine Komponente den 2PCProzess (d.h. die Wahl) koordiniert. Sie sollen selbst definieren, wie entschieden wird, welche Bank der Koordinator ist. 
+
+Wie bei jeder anderen Aufgabe, definieren Sie hier neue Tests, die die Korrektheit
+der neuen MOM-Schnittstelle feststellen. 
+
+Definieren Sie auch, wie die Performanz der Schnittstelle gemessen werden kann. Wiederholen Sie die Performance-Tests aus Aufgabe 1, 2 und 3 und vergleichen Sie die Testergebnisse, um festzustellen, wie die Performance aller Schnittstellen leidet, wenn gleichzeitig die MOM-Schnittstelle unter Last steht. 
+
+Dokumentieren Sie die dabei alle gewonnene Erkenntnisse in Ihrem Messprotokoll und geben Sie es im Moodle ab.
+
+*Für den Bonus könnte ein Konsens-Algorithmus hierfür verwendet werden, z.B. der Raft Algorithmus oder ein Paxos Algorithmus.*
