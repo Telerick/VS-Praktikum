@@ -103,7 +103,7 @@ public:
         stockMarketAddr.sin_port = htons(UDP_PORT);
 
         // Send a registration message with hostname and all stock acronyms to the stockMarket
-        sendto(sockfd, timestamp.c_str(), regMsg.length(), 0, (struct sockaddr *) &stockMarketAddr,
+        sendto(sockfd, timestamp.c_str(), timestamp.length(), 0, (struct sockaddr *) &stockMarketAddr,
                sizeof(stockMarketAddr));
 
         std::cout << "ACK sent" << std::endl;

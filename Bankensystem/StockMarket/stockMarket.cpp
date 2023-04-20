@@ -135,11 +135,11 @@ int sendMessage(std::string message, std::string ip, bool needAck) {
             return 1;
         }
 
-        if(servaddr.sin_addr.s_addr == reply_address.sin_addr.s_addr){ //check if response is from correct server
+        //if(servaddr.sin_addr.s_addr == reply_address.sin_addr.s_addr){ //check if response is from correct server
             auto end_time = std::chrono::high_resolution_clock::now(); //stop RTT stopwatch
             long rtt = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count(); //calculate rtt
             std::cout << "RTT: " << rtt << " mikroseconds\n";
-        }
+        //}
     }
 
     std::cout << "Send message to: " << ip << std::endl;
@@ -204,6 +204,9 @@ void startSubscribeServer() {
                 std::cout << "Subscriber list changed:" << std::endl;
                 printMap();
             } else if (type == "stop") {
+                return;
+            } else if (message == "ACK"){
+                std::cout << "Received ACK message, feature of measuring RTT will be supported in a future version. Stay tuned!";
                 return;
             } else {
                 std::cout << "No valid message type" << std::endl;
