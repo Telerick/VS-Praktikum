@@ -95,7 +95,7 @@ void fillMap() {
     }
 }
 
-int sendMessage(std::string message, std::string ip) {
+int sendMessage(std::string message, std::string ip, bool needAck) {
     int sockfd, n;
     socklen_t len;
     char buffer[BUF_SIZE];
@@ -115,18 +115,35 @@ int sendMessage(std::string message, std::string ip) {
     servaddr.sin_port = htons(8080);
     servaddr.sin_addr.s_addr = inet_addr(ip.c_str());
 
-    
+    auto start_time = std::chrono::high_resolution_clock::now(); //start for RTT
 
     // Send message to server
     sendto(sockfd, message.c_str(), message.length(), MSG_CONFIRM, (const struct sockaddr *) &servaddr,
            sizeof(servaddr));
 
-    //wait for ACK
+    if(needAck){
+        //get ack and print RTT
+        struct sockaddr_in reply_address;
+        char buffersend[BUF_SIZE];
+        socklen_t reply_address_length = sizeof(reply_address);
+        std::memset(&reply_address, 0, reply_address_length);
+        std::memset(buffersend, 0, BUF_SIZE);
+        if (recvfrom(sockfd, buffersend, BUF_SIZE, 0, (struct sockaddr*)&reply_address, &reply_address_length) < 0) {
+            std::cout << "Send message to: " << ip << std::endl;
+            std::cerr << "Failed to receive response\n";
+            close(sockfd);
+            return 1;
+        }
+
+        if(servaddr.sin_addr.s_addr == reply_address.sin_addr.s_addr){ //check if response is from correct server
+            auto end_time = std::chrono::high_resolution_clock::now(); //stop RTT stopwatch
+            long rtt = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count(); //calculate rtt
+            std::cout << "RTT: " << rtt << " mikroseconds\n";
+        }
+    }
 
     std::cout << "Send message to: " << ip << std::endl;
-
     close(sockfd);
-
     return 0;
 }
 
@@ -217,7 +234,7 @@ void transactionThread() {
         std::vector <std::string> addresses = getSubscriber(acronym);
 
         for (int i = 0; i < addresses.size(); ++i) {
-            sendMessage(message, addresses[i]);
+            sendMessage(message, addresses[i], false); //change to true for RTT
             std::cout << "Send message to: " << addresses[i] << std::endl;
         }
         mu.unlock();
