@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bank Holding Stocks</title>
+  <style>
+    .block {
+      border: 1px solid black;
+      padding: 10px;
+      width: 200px;
+      height: 150px;
+      display: inline-block;
+      margin: 10px;
+      text-align: center;
+    }
+
+    .symbol {
+      font-size: 36px;
+      font-weight: bold;
+    }
+
+    .name {
+      font-size: 24px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    .price-quantity {
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bank Holding Stocks</h1>
+  <input type="file" id="file-input">
+  <button id="file-button">Upload File</button>
+  <div id="stocks"></div>
+
+  <script>
+    const fileButton = document.getElementById('file-button');
+    const fileInput = document.getElementById('file-input');
+
+    fileButton.addEventListener('click', () => {
+      // Get the selected file
+      const file = fileInput.files[0];
+      if (!file) {
+        alert('Please select a file.');
+        return;
+      }
+
+      // Read the file as text
+      const reader = new FileReader();
+      reader.addEventListener('load', () => {
+        try {
+          const data = JSON.parse(reader.result);
+
+          // Create a block element for each stock
+          let stocksHtml = '';
+          data.stocks.forEach(stock => {
+            const stockHtml = `
+              <div class="block">
+                <div class="symbol">${stock.symbol}</div>
+                <div class="name">${stock.name}</div>
+                <div class="price-quantity">$${stock.price} (${stock.quantity})</div>
+              </div>
+            `;
+            stocksHtml += stockHtml;
+          });
+
+          // Display the block elements in a grid
+          document.getElementById('stocks').innerHTML = stocksHtml;
+        } catch (error) {
+          alert('Invalid JSON file.');
+          console.error(error);
+        }
+      });
+      reader.readAsText(file);
+    });
+  </script>
+</body>
+</html>
