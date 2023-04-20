@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  server:
+    container_name: server2
+    build: ./Server/
+  client:
+    container_name: client2
+    build: ./Client/
+    depends_on:
+      - server
