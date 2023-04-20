@@ -115,9 +115,13 @@ int sendMessage(std::string message, std::string ip) {
     servaddr.sin_port = htons(8080);
     servaddr.sin_addr.s_addr = inet_addr(ip.c_str());
 
+    
+
     // Send message to server
     sendto(sockfd, message.c_str(), message.length(), MSG_CONFIRM, (const struct sockaddr *) &servaddr,
            sizeof(servaddr));
+
+    //wait for ACK
 
     std::cout << "Send message to: " << ip << std::endl;
 
