@@ -76,6 +76,39 @@ public:
         std::cout << "Registration sent" << std::endl;
     }
 
+
+    void sendACKtoStockMarket(std::string timestamp) {
+        std::cout << "ACK for " << this->name << std::endl;
+
+        int sockfd;
+        // Creating socket file descriptor for stock market
+        if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+            std::cerr << "Error: socket creation failed" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+
+        sockaddr_in stockMarketAddr;
+
+        const char *hostname = "stockMarket";
+        struct hostent *stockMarket = gethostbyname(hostname);
+        if (stockMarket == NULL) {
+            std::cerr << "Error: could not resolve hostname" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+
+        // Filling stockMarket information
+        memset(&stockMarketAddr, 0, sizeof(stockMarketAddr));
+        stockMarketAddr.sin_family = AF_INET;
+        stockMarketAddr.sin_addr = *((struct in_addr *) stockMarket->h_addr);
+        stockMarketAddr.sin_port = htons(UDP_PORT);
+
+        // Send a registration message with hostname and all stock acronyms to the stockMarket
+        sendto(sockfd, timestamp.c_str(), regMsg.length(), 0, (struct sockaddr *) &stockMarketAddr,
+               sizeof(stockMarketAddr));
+
+        std::cout << "ACK sent" << std::endl;
+    }
+
     void receiveMessage() {
         std::cout << "Start receiveMessage" << std::endl;
 
@@ -127,10 +160,11 @@ public:
                       << inet_ntoa(bankAddr.sin_addr) << std::endl;
             std::cout << "TRANSACTION ->\tAcronym: " << acronym << "\t";
             std::cout << "Price: " << price << "\t";
-            std::cout << "Amount: " << amount << std::endl;
+            std::cout << "Amount: " << amount << "\t send ACK..." <<std::endl;
 
 
             updateStock(acronym, price);
+            sendACKtoStockMarket("ACK");
             //std::cout << "INSIDE receiveMessage()" << std::endl;
 
         }
