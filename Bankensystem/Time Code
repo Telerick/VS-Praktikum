@@ -1,0 +1,21 @@
+
+
+// HILFSMETHODE CHRONO ZU STRING
+std::string timePointToString(const std::chrono::time_point<std::chrono::high_resolution_clock>& timePoint) {
+    using namespace std::chrono;
+
+    auto duration = timePoint.time_since_epoch();
+    auto mikrosec = duration_cast<microseconds>(duration).count();
+
+    return std::to_string(mikrosec);
+}
+
+// AUFRUF UND ERZEUGUNG TIMESTAMP
+auto start_time = std::chrono::high_resolution_clock::now();
+std::string timeString = timePointToString(start_time);
+std::cout << "TIMESTRING: " << timeString << std::endl;
+std::string message = + " ";
+
+// BERECHNUNG RTT
+auto end_time = std::chrono::high_resolution_clock::now();
+long rtt = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
