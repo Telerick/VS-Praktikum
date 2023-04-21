@@ -1,0 +1,35 @@
+/* Header-Stile */
+.header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+  background-color: #647295;
+  color: #f2ebe5;
+  font-size: 1.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  min-width: 100%;
+  border-radius: 0.5rem;
+
+}
+
+.header h1 {
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  font-size: 1.2rem;
+  margin: 2rem;
+}
+
+.text {
+flex-direction: column;
+}
+
+.logo {
+width: 15rem;
+height: auto;
+}
+
+

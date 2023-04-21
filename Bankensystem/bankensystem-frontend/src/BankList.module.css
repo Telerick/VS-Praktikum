@@ -1,0 +1,112 @@
+/* Allgemeine Stile */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: sans-serif;
+  background-color: #f2ebe5;
+  color: #647295;
+  min-height: 100vh;
+}
+
+
+
+/* Bank-Liste-Stile */
+.bank-list-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.bank-list-logo-container {
+  margin-bottom: 1rem;
+  
+}
+
+.bank-list-boerse {
+  width: 100%;
+  height: auto;
+  box-shadow: 2px 2px 5px #647295;
+  border-radius: 0.5rem;
+}
+
+.bank-list-inner {
+  width: 100%;
+  background-color: #647295;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.bank-list-inner p {
+color: #f2ebe5;
+}
+
+.bank-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.bank-list-item {
+  background-color: #9f496e;
+  color: #f2ebe5;
+  font-size: 1.5rem;
+  padding: 1rem;
+  margin: 0.5rem;
+  cursor: pointer;
+  border-radius: 0.5rem;
+  text-align: center;
+  width: 100%;
+  max-width: 20rem;
+}
+
+.bank-list-item:hover {
+  background-color: #2b262d;
+}
+
+.bank-list-footer {
+  margin-top: 1rem;
+  text-align: center;
+  color: #647295;
+}
+
+/* Responsives Design */
+@media (min-width: 768px) {
+  
+  
+  .bank-list-container {
+    height: auto;
+    padding: 2rem;
+  }
+  
+  .bank-list-header {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+  
+  .bank-list-header-p {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .bank-list-logo-container {
+    margin-bottom: 2rem;
+  }
+  
+  .bank-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around;
+  }
+  
+  .bank-list-item {
+    width: auto;
+    max-width: none;
+  }
+}

@@ -1,0 +1,41 @@
+.wertpapier-container {
+  background-color: #F2EBE5;
+  border-radius: 10px;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.wertpapier-container h3 {
+  color: #647295;
+  font-size: 1.2em;
+  margin-bottom: 10px;
+}
+
+.wertpapier-container p {
+  color: #2B262D;
+  font-size: 1.2em;
+  margin-bottom: 10px;
+}
+
+.wertpapier-container input[type='number'] {
+  width: 80px;
+  margin-right: 10px;
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #9F496E;
+}
+
+.wertpapier-container button {
+  background-color: #9F496E;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: none;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.wertpapier-container button:hover {
+  background-color: #2B262D;
+}
