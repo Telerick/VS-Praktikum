@@ -29,6 +29,11 @@ std::map <std::string, std::vector<std::string>> map;
 
 std::mutex mu;
 
+bool rttActive = false;
+auto start_time = std::chrono::high_resolution_clock::now();
+auto end_time = std::chrono::high_resolution_clock::now();
+struct sockaddr_in rttaddr;
+
 //
 // functions
 //
@@ -115,32 +120,15 @@ int sendMessage(std::string message, std::string ip, bool needAck) {
     servaddr.sin_port = htons(8080);
     servaddr.sin_addr.s_addr = inet_addr(ip.c_str());
 
-    auto start_time = std::chrono::high_resolution_clock::now(); //start for RTT
+    if(needAck) { //if this is the message for the rtt
+        rttActive = true; //activate the rtt function
+        rttaddr = servaddr; //save the ip addr for later comparison
+        start_time = std::chrono::high_resolution_clock::now(); //save start time for RTT
+    }
 
     // Send message to server
     sendto(sockfd, message.c_str(), message.length(), MSG_CONFIRM, (const struct sockaddr *) &servaddr,
            sizeof(servaddr));
-
-    if(needAck){
-        //get ack and print RTT
-        struct sockaddr_in reply_address;
-        char buffersend[BUF_SIZE];
-        socklen_t reply_address_length = sizeof(reply_address);
-        std::memset(&reply_address, 0, reply_address_length);
-        std::memset(buffersend, 0, BUF_SIZE);
-        if (recvfrom(sockfd, buffersend, BUF_SIZE, 0, (struct sockaddr*)&reply_address, &reply_address_length) < 0) {
-            std::cout << "Send message to: " << ip << std::endl;
-            std::cerr << "Failed to receive response\n";
-            close(sockfd);
-            return 1;
-        }
-
-        //if(servaddr.sin_addr.s_addr == reply_address.sin_addr.s_addr){ //check if response is from correct server
-            auto end_time = std::chrono::high_resolution_clock::now(); //stop RTT stopwatch
-            long rtt = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count(); //calculate rtt
-            std::cout << "RTT: " << rtt << " mikroseconds\n";
-        //}
-    }
 
     std::cout << "Send message to: " << ip << std::endl;
     close(sockfd);
@@ -182,20 +170,23 @@ void startSubscribeServer() {
         int n = recvfrom(sockfd, &message[0], message.size(), MSG_WAITALL, (struct sockaddr *) &cliaddr, &len);
         //buffer[n] = '\0';
         if (n > 0) {
+            mu.lock();
             std::cout << "Received message: " << message << std::endl;
+
             // split the message into its parts
             std::istringstream iss(message);
             std::string bankname, type;
-            int numberStocks = 0;
-            iss >> bankname >> type >> numberStocks;
+            iss >> bankname >> type;
 
             if (type == "sub") {
+                int numberStocks = 0;
+                iss >> numberStocks;
                 for (int i = 0; i < numberStocks; ++i) {
                     std::string tmpAcronym;
                     iss >> tmpAcronym;
-                    mu.lock();
+                    //mu.lock();
                     addSubscriber(tmpAcronym, inet_ntoa(cliaddr.sin_addr)); //could use cliaddr.sin_addr
-                    mu.unlock();
+                    //mu.unlock();
                 }
                 std::cout << "Subscriber list changed:" << std::endl;
                 printMap();
@@ -204,13 +195,20 @@ void startSubscribeServer() {
                 std::cout << "Subscriber list changed:" << std::endl;
                 printMap();
             } else if (type == "stop") {
+                mu.unlock();
                 return;
-            } else if (message == "ACK"){
-                std::cout << "Received ACK message, feature of measuring RTT will be supported in a future version. Stay tuned!";
-                return;
+            } else if (type == "ACK"){
+                //std::cout << "Received ACK message, feature of measuring RTT will be supported in a future version. Stay tuned!" << std::endl;
+                if(rttaddr.sin_addr.s_addr == cliaddr.sin_addr.s_addr && rttActive) { //check if response is from correct server (rtt just for one message)
+                    end_time = std::chrono::high_resolution_clock::now();
+                    long rtt = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count(); //calculate rtt
+                    std::cout << "RTT: " << rtt << " mikroseconds\n";
+                }
             } else {
                 std::cout << "No valid message type" << std::endl;
+                //cout variables
             }
+            mu.unlock();
         }
     }
 
@@ -237,7 +235,11 @@ void transactionThread() {
         std::vector <std::string> addresses = getSubscriber(acronym);
 
         for (int i = 0; i < addresses.size(); ++i) {
-            sendMessage(message, addresses[i], false); //change to true for RTT
+            if(i!=0){
+                sendMessage(message, addresses[i], false);
+            } else{
+                sendMessage(message, addresses[i], true); //send Message with RTT tracking just for the first message (only supported for one message)
+            }
             std::cout << "Send message to: " << addresses[i] << std::endl;
         }
         mu.unlock();
