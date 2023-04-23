@@ -244,6 +244,7 @@ public:
             exit(1);
         }
 
+
         // accept incoming connections and process requests
         while (true) {
             client_socket = accept(server_socket, (struct sockaddr *)&client_address, &client_address_len);

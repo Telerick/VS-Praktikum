@@ -17,6 +17,7 @@ int main() {
     bank.receiveMessage();
     std::cout << "OUTSIDE receiveMessage()" << std::endl;
 
+
     /*
     std::thread t(bank.bankInterface);
     t.join();
