@@ -9,7 +9,10 @@
 #include <vector>
 #include <random>
 #include <chrono>
+#include <sstream>
+#include <fstream>
 #include <thread>
+#include <mutex>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -205,12 +208,124 @@ public:
         printTotalValue();
     }
 
+    // HTTP GET & POST interface for web ui
+    void bankInterface() {
+        std::cout << "Start bankInterface" << std::endl;
+        const int PORT = 8000;
+        int server_socket, client_socket;
+        struct sockaddr_in server_address, client_address;
+        socklen_t client_address_len = sizeof(client_address);
+        char BUFFER[1024] = {0};
+        std::string response;
+
+        // create socket
+        server_socket = socket(AF_INET, SOCK_STREAM, 0);
+        if (server_socket < 0) {
+            std::cout << "error opening socket" << std::endl;
+            exit(1);
+        }
+
+        // setup server address
+        memset(&server_address, 0, sizeof(server_address));
+        server_address.sin_family = AF_INET;
+        server_address.sin_addr.s_addr = INADDR_ANY;
+        server_address.sin_port = htons(PORT);
+
+        // bind socket to address
+        if (bind(server_socket, (struct sockaddr *)&server_address, sizeof(server_address)) < 0) {
+            std::cout << "error on binding" << std::endl;
+            exit(1);
+        }
+
+        // listen for incoming connections
+        // maximum of 5 pending connections
+        if (listen(server_socket, 5) < 0) {
+            std::cout << "error on listening" << std::endl;
+            exit(1);
+        }
+
+        // accept incoming connections and process requests
+        while (true) {
+            client_socket = accept(server_socket, (struct sockaddr *)&client_address, &client_address_len);
+            if (client_socket < 0) {
+                std::cout << "error on accept connection" << std::endl;
+                exit(1);
+            }
+
+            // lock mutex before accessing shared data
+            //std::lock_guard<std::mutex> lock(mu);
+
+            // read client request
+            int request_size = read(client_socket, BUFFER, sizeof(BUFFER) - 1 );
+            if (request_size < 0) {
+                std::cout << "error reading from socket" << std::endl;
+                exit(1);
+            }
+
+            // process GET request and response with bank value
+            std::cout << strncmp(BUFFER, "GET /total HTTP/1.1", 18) << std::endl;
+            if (strncmp(BUFFER, "GET /total HTTP/1.1", 18) == 0) {
+                std::cout << "GET RESPONSE" << std::endl;
+                // lock_guard ensures that the mutex is automatically unlocked when the scope is exited
+                std::stringstream response_stream;
+                response_stream << "HTTP/1.1 200 OK\r\n";
+                response_stream << "Content-Type: text/html\r\n";
+                response_stream << "Connection: close\r\n\r\n";
+                response_stream << this->totalValue;
+                response = response_stream.str();
+                std::cout << "GET:" << response << std::endl;
+            }
+            // process POST request and update bank data
+            else if(strncmp(BUFFER, "POST /update HTTP/1.1", 21) == 0) {
+                // extract values from body
+                std::string request(BUFFER);
+                std::size_t pos = request.find("\r\n\r\n");
+                if (pos != std::string::npos) {
+                    std::string value_str = request.substr(pos + 4);
+                    int new_value = std::stoi(value_str);
+
+                    // lock mutex before modifying shared data
+                    // this ensures that only one thread can write to totalValue at a time
+                    //std::lock_guard<std::mutex> lock(mu);
+
+                    // update value with data from POST request
+                    this->totalValue = new_value;
+
+                    // generate OK response
+                    std::stringstream response_stream;
+                    response_stream << "HTTP/1.1 200 OK\r\n";
+                    response_stream << "Content-Type: application/x-www-form-urlencoded\r\n";
+                    response_stream << "Connection: close\r\n\r\n";
+                    response = response_stream.str();
+                } else {
+                    response = "HTTP/1.1 400 Bad Request\r\n";
+                }
+            } else {
+                response = "HTTP/1.1 400 Bad Request\r\n";
+            }
+
+            // send response to client
+            int response_size = send(client_socket, response.c_str(), response.size(), 0);
+            if (response_size < 0) {
+                std::cout << "error writing to socket" << std::endl;
+                exit(1);
+            }
+
+            // close client connection
+            close(client_socket);
+        }
+
+        // close server connection
+        close(server_socket);
+    }
+
 private:
     std::vector<BStock *> portfolio;
     int cashReserves;
     int outstandingLoans;
     unsigned int totalValue;
     std::string name;
+    std::mutex mu;
 };
 
 #endif // BANKENSYSTEM_BANK_H
