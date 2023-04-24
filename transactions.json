@@ -1,0 +1,211 @@
+{ "transactions": {
+    "1": {
+    "type": "cashOut",
+    "amount": 9426
+    },
+    "2": {
+    "type": "creditOut",
+    "amount": 6234
+    },
+    "3": {
+    "type": "cashBack",
+    "amount": 1234
+    },
+    "4": {
+    "type": "creditBack",
+    "amount": 632
+    },
+    "5": {
+    "type": "cashOut",
+    "amount": 3712
+    },
+    "6": {
+    "type": "creditOut",
+    "amount": 13287
+    },
+    "7": {
+    "type": "cashBack",
+    "amount": 2691
+    },
+    "8": {
+      "type": "sellStock",
+      "amount": 184
+    },
+    "9": {
+      "type": "buyStock",
+      "amount": 266
+    },
+    "10": {
+      "type": "sellStock",
+      "amount": 112
+    },
+    "11": {
+      "type": "buyStock",
+      "amount": 76
+    },
+    "12": {
+    "type": "creditBack",
+    "amount": 785
+    },
+    "13": {
+    "type": "cashOut",
+    "amount": 13310
+    },
+    "14": {
+    "type": "creditOut",
+    "amount": 6944
+    },
+    "15": {
+    "type": "cashBack",
+    "amount": 3577
+    },
+    "16": {
+    "type": "creditBack",
+    "amount": 1089
+    },
+    "17": {
+    "type": "cashOut",
+    "amount": 3954
+    },
+    "18": {
+    "type": "creditOut",
+    "amount": 1497
+    },
+    "19": {
+    "type": "cashBack",
+    "amount": 8142
+    },
+    "20": {
+    "type": "creditBack",
+    "amount": 467
+    },
+    "21": {
+    "type": "cashOut",
+    "amount": 5461
+    },
+    "22": {
+    "type": "creditOut",
+    "amount": 2778
+    },
+    "23": {
+    "type": "cashBack",
+    "amount": 10159
+    },
+    "24": {
+    "type": "buyStock",
+    "amount": 129
+    },
+    "25": {
+    "type": "sellStock",
+    "amount": 51
+    },
+    "26": {
+      "type": "buyStock",
+      "amount": 269
+    },
+    "27": {
+      "type": "sellStock",
+      "amount": 137
+    },
+    "28": {
+      "type": "buyStock",
+      "amount": 168
+    },
+    "29": {
+    "type": "creditBack",
+    "amount": 1377
+    },
+    "30": {
+    "type": "cashOut",
+    "amount": 7134
+    },
+    "31": {
+    "type": "creditOut",
+    "amount": 7822
+    },
+    "32": {
+    "type": "cashBack",
+    "amount": 12787
+    },
+    "33": {
+    "type": "creditBack",
+    "amount": 986
+    },
+    "34": {
+    "type": "cashOut",
+    "amount": 10762
+    },
+    "35": {
+    "type": "creditOut",
+    "amount": 7640
+    },
+    "36": {
+    "type": "cashBack",
+    "amount": 8798
+    },
+    "37": {
+    "type": "creditBack",
+    "amount": 914
+    },
+    "38": {
+    "type": "cashOut",
+    "amount": 10855
+    },
+    "39": {
+    "type": "creditOut",
+    "amount": 6930
+    },
+    "40": {
+    "type": "cashBack",
+    "amount": 2237
+    },
+    "41": {
+    "type": "creditBack",
+    "amount": 914
+    },
+    "42": {
+      "type": "sellStock",
+      "amount": 58
+    },
+    "43": {
+      "type": "buyStock",
+      "amount": 97
+    },
+    "44": {
+      "type": "sellStock",
+      "amount": 104
+    },
+    "45": {
+      "type": "buyStock",
+      "amount": 215
+    },
+    "46": {
+      "type": "sellStock",
+      "amount": 178
+    },
+    "47": {
+      "type": "buyStock",
+      "amount": 98
+    },
+    "48": {
+      "type": "sellStock",
+      "amount": 280
+    },
+    "49": {
+      "type": "buyStock",
+      "amount": 82
+    },
+    "50": {
+      "type": "sellStock",
+      "amount": 245
+    },
+    "51": {
+      "type": "buyStock",
+      "amount": 285
+    },
+    "52": {
+      "type": "sellStock",
+      "amount": 75
+    }
+}
+}

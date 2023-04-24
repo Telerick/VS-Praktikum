@@ -13,7 +13,7 @@ const banks = [
   "Credit Suisse",
 ];
 
-const BankList = ({ onBankClick }) => {
+const BankList = (props) => {
   return (
     <div className={classes["bank-list-container"]}>
       <Header />
@@ -30,13 +30,13 @@ const BankList = ({ onBankClick }) => {
         </p>
         <div className={classes["bank-list"]}>
           {banks.map((bank) => (
-            <div
-              key={bank.id}
+            <button
+              key={bank}
               className={classes["bank-list-item"]}
-              onClick={() => onBankClick(bank)}
+              onClick={() => props.onBankClick(bank)}
             >
               {bank}
-            </div>
+            </button>
           ))}
         </div>
       </div>
