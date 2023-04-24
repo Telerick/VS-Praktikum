@@ -44,7 +44,6 @@ const BankView = (props) => {
         setStocks(data.stocks);
       } catch (error) {
         console.error("Error fetching initial bank data:", error);
-        // Hier können Sie den Fehler entsprechend behandeln, z.B. eine Fehlermeldung anzeigen
       }
     };
     fetchData();

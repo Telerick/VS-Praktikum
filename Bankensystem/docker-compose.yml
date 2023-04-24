@@ -67,8 +67,7 @@ services:
     networks:
       mynet:
         ipv4_address: 172.20.0.6
-
-react-app:
+  react-app:
     container_name: reactApp
     build:
       context: .
