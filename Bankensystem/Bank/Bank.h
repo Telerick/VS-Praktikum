@@ -77,8 +77,8 @@ public:
     }
 
 
-    void sendACKtoStockMarket(std::string timestamp) {
-        std::cout << "ACK for " << this->name << std::endl;
+    void sendMessageToStockMarket(std::string message) {
+        std::cout << "Sending Message: " << message << std::endl;
 
         int sockfd;
         // Creating socket file descriptor for stock market
@@ -103,10 +103,8 @@ public:
         stockMarketAddr.sin_port = htons(UDP_PORT);
 
         // Send a registration message with hostname and all stock acronyms to the stockMarket
-        sendto(sockfd, timestamp.c_str(), timestamp.length(), 0, (struct sockaddr *) &stockMarketAddr,
+        sendto(sockfd, message.c_str(), message.length(), 0, (struct sockaddr *) &stockMarketAddr,
                sizeof(stockMarketAddr));
-
-        std::cout << "ACK sent" << std::endl;
     }
 
     void receiveMessage() {
@@ -148,24 +146,29 @@ public:
                 std::cerr << "Error receiving message" << std::endl;
                 break;
             }
-            //std::cout << "After receive" << std::endl;
+
+            std::cout << "Received Message: " << message << std::endl;
+
             // split the message into its parts
             std::istringstream iss(message);
-            std::string acronym;
+            std::string acronym, needAck;
             unsigned int price, amount;
-            iss >> acronym >> price >> amount;
+            iss >> acronym >> price >> amount >> needAck;
 
             // print the received message parts and source address
             std::cout << this->name << " received " << nbytes << " bytes from "
                       << inet_ntoa(bankAddr.sin_addr) << std::endl;
             std::cout << "TRANSACTION ->\tAcronym: " << acronym << "\t";
             std::cout << "Price: " << price << "\t";
-            std::cout << "Amount: " << amount << "\t send ACK..." <<std::endl;
+            std::cout << "Amount: " << amount <<std::endl;
 
 
             updateStock(acronym, price);
-            std::string ackMessage = this->name + " ACK ";
-            sendACKtoStockMarket(ackMessage);
+
+            if (needAck=="true"){
+                std::string ackMessage = this->name + " ACK ";
+                sendMessageToStockMarket(ackMessage);
+            }
             //std::cout << "INSIDE receiveMessage()" << std::endl;
 
         }

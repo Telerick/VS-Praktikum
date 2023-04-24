@@ -17,7 +17,7 @@ public:
         float courseChangeFactor = ((float) rand() / (float) RAND_MAX) * 0.38 - 0.19;
         this->price += (unsigned int) (courseChangeFactor * this->price);
         unsigned int stockAmount = rand() % 451 + 50;
-        return this->acronym + " " + std::to_string(this->price) + " " + std::to_string(stockAmount);
+        return this->acronym + " " + std::to_string(this->price) + " " + std::to_string(stockAmount) + " ";
     }
 
 private:

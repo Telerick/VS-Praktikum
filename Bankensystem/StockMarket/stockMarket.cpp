@@ -34,6 +34,9 @@ auto start_time = std::chrono::high_resolution_clock::now();
 auto end_time = std::chrono::high_resolution_clock::now();
 struct sockaddr_in rttaddr;
 
+long averageRtt;
+int averageRttCnt = 0;
+
 //
 // functions
 //
@@ -171,7 +174,7 @@ void startSubscribeServer() {
         //buffer[n] = '\0';
         if (n > 0) {
             mu.lock();
-            std::cout << "Received message: " << message << std::endl;
+            //std::cout << "Received message: " << message << std::endl;
 
             // split the message into its parts
             std::istringstream iss(message);
@@ -202,7 +205,14 @@ void startSubscribeServer() {
                 if(rttaddr.sin_addr.s_addr == cliaddr.sin_addr.s_addr && rttActive) { //check if response is from correct server (rtt just for one message)
                     end_time = std::chrono::high_resolution_clock::now();
                     long rtt = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count(); //calculate rtt
-                    std::cout << "RTT: " << rtt << " mikroseconds\n";
+                    std::cout << "RTT: " << rtt << " microseconds" << std::endl;
+                    if(averageRttCnt>0){
+                        averageRtt = ((averageRtt*averageRttCnt)+rtt)/(++averageRttCnt);
+                    } else {
+                        averageRttCnt++;
+                        averageRtt = rtt;
+                    }
+                    std::cout << "New average RTT: " << averageRtt << " microseconds, calculated with " << averageRttCnt << " values" << std::endl;
                 }
             } else {
                 std::cout << "No valid message type" << std::endl;
@@ -235,12 +245,12 @@ void transactionThread() {
         std::vector <std::string> addresses = getSubscriber(acronym);
 
         for (int i = 0; i < addresses.size(); ++i) {
-            if(i!=0){
-                sendMessage(message, addresses[i], false);
+            if(i==addresses.size()-1){
+                sendMessage(message + "true ", addresses[i], true); //send Message with RTT tracking just for the last message (only supported for one message)
             } else{
-                sendMessage(message, addresses[i], true); //send Message with RTT tracking just for the first message (only supported for one message)
+                sendMessage(message + "false ", addresses[i], false);
             }
-            std::cout << "Send message to: " << addresses[i] << std::endl;
+            //std::cout << "Send message to: " << addresses[i] << std::endl;
         }
         mu.unlock();
 
