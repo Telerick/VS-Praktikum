@@ -67,6 +67,27 @@ services:
     networks:
       mynet:
         ipv4_address: 172.20.0.6
+
+react-app:
+    container_name: reactApp
+    build:
+      context: .
+      dockerfile: Dockerfile_react
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    networks:
+      mynet:
+        ipv4_address: 172.20.0.7
+    depends_on:
+      - stock-market
+      - bank1
+      - bank2
+      - bank3
+      - bank4
 networks:
   mynet:
     ipam:
