@@ -164,7 +164,8 @@ public:
 
 
             updateStock(acronym, price);
-            sendACKtoStockMarket("ACK");
+            std::string ackMessage = this->name + " ACK ";
+            sendACKtoStockMarket(ackMessage);
             //std::cout << "INSIDE receiveMessage()" << std::endl;
 
         }
