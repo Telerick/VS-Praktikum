@@ -31,19 +31,24 @@ const BankView = (props) => {
   const [outstandingLoans, setOutstandingLoans] = useState("");
   const [jsonUploaded, setJsonUploaded] = useState(false);
 
-  /*
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch(`http://${props.bankName}:${TCP_PORT}/initalBankData`);
-      const data = await response.json();
-      setBankValue(data.bankValue);
-      setCashReserves(data.cashReserves);
-      setOutstandingLoans(data.outstandingLoans);
-      setStocks(data.stocks);
+      try {
+        const response = await fetch(
+          `http://${props.bankName}:${TCP_PORT}/initalBankData`
+        );
+        const data = await response.json();
+        setBankValue(data.bankValue);
+        setCashReserves(data.cashReserves);
+        setOutstandingLoans(data.outstandingLoans);
+        setStocks(data.stocks);
+      } catch (error) {
+        console.error("Error fetching initial bank data:", error);
+        // Hier können Sie den Fehler entsprechend behandeln, z.B. eine Fehlermeldung anzeigen
+      }
     };
     fetchData();
   }, []);
-*/
 
   async function startCashOrLoansChangeRequest(bankName, requestBody) {
     const response = await fetch(`http://${bankName}:${TCP_PORT}/bankValues`, {
