@@ -26,6 +26,7 @@
 // global variables
 //
 std::map <std::string, std::vector<std::string>> map;
+std::map <std::string, std::string> ipBankMap;
 
 std::mutex mu;
 
@@ -46,6 +47,11 @@ void addStock(std::string stock) {
     }
     std::vector <std::string> v1;
     map[stock] = v1;
+}
+
+void mapBankToIP(std::string ip, std::string bankName){
+    ipBankMap[ip] = bankName;
+    std::cout << "ADD to IP-Bank Map: " << "{" << ip << "}" << "{" << bankName << "}"  << "PROOF" << ipBankMap[ip] << std::endl;
 }
 
 void addSubscriber(std::string stock, std::string ip) {
@@ -83,16 +89,17 @@ std::vector <std::string> getSubscriber(std::string stock) {
     return map[stock];
 }
 
-void printVector(std::vector <std::string> v) {
-    for (const auto &i: v) {
-        std::cout << i << ", ";
+void printVector(std::vector <std::string> v, std::map <std::string, std::string> bankName) {
+    for (const auto &ip: v) {
+        std::cout << ip;
+        std::cout << "{" << bankName[ip] << "},";
     }
 }
 
 void printMap() {
     for (const auto &[key, value]: map) {
         std::cout << '[' << key << "] = ";
-        printVector(value);
+        printVector(value, ipBankMap);
         std::cout << ";" << std::endl;
     }
 }
@@ -191,6 +198,7 @@ void startSubscribeServer() {
                     addSubscriber(tmpAcronym, inet_ntoa(cliaddr.sin_addr)); //could use cliaddr.sin_addr
                     //mu.unlock();
                 }
+                mapBankToIP(inet_ntoa(cliaddr.sin_addr), bankname);
                 std::cout << "Subscriber list changed:" << std::endl;
                 printMap();
             } else if (type == "desub") {
