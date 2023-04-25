@@ -51,7 +51,7 @@ void addStock(std::string stock) {
 
 void mapBankToIP(std::string ip, std::string bankName){
     ipBankMap[ip] = bankName;
-    std::cout << "ADD to IP-Bank Map: " << "{" << ip << "}" << "{" << bankName << "}"  << "PROOF" << ipBankMap[ip] << std::endl;
+    //std::cout << "ADD to IP-Bank Map: " << "{" << ip << "}" << "{" << bankName << "}"  << "PROOF" << ipBankMap[ip] << std::endl;
 }
 
 void addSubscriber(std::string stock, std::string ip) {
@@ -91,8 +91,8 @@ std::vector <std::string> getSubscriber(std::string stock) {
 
 void printVector(std::vector <std::string> v, std::map <std::string, std::string> bankName) {
     for (const auto &ip: v) {
-        std::cout << ip;
-        std::cout << "{" << bankName[ip] << "},";
+        std::cout << bankName[ip];
+        std::cout << " (" << ip << "),";
     }
 }
 
@@ -140,7 +140,7 @@ int sendMessage(std::string message, std::string ip, bool needAck) {
     sendto(sockfd, message.c_str(), message.length(), MSG_CONFIRM, (const struct sockaddr *) &servaddr,
            sizeof(servaddr));
 
-    std::cout << "Send message to: " << ip << std::endl;
+    std::cout << "Send message to: " << ipBankMap[ip] << " (" << ip << ")" << std::endl;
     close(sockfd);
     return 0;
 }
@@ -213,14 +213,14 @@ void startSubscribeServer() {
                 if(rttaddr.sin_addr.s_addr == cliaddr.sin_addr.s_addr && rttActive) { //check if response is from correct server (rtt just for one message)
                     end_time = std::chrono::high_resolution_clock::now();
                     long rtt = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count(); //calculate rtt
-                    std::cout << "RTT: " << rtt << " microseconds" << std::endl;
+                    std::cout << "RTT: " << rtt/1000. << " ms" << std::endl;
                     if(averageRttCnt>0){
                         averageRtt = ((averageRtt*averageRttCnt)+rtt)/(++averageRttCnt);
                     } else {
                         averageRttCnt++;
                         averageRtt = rtt;
                     }
-                    std::cout << "New average RTT: " << averageRtt << " microseconds, calculated with " << averageRttCnt << " values" << std::endl;
+                    std::cout << "New average RTT: " << averageRtt/1000.0 << " ms, calculated with " << averageRttCnt << " values" << std::endl;
                 }
             } else {
                 std::cout << "No valid message type" << std::endl;
@@ -262,7 +262,7 @@ void transactionThread() {
         }
         mu.unlock();
 
-        std::this_thread::sleep_until(std::chrono::system_clock::now() + std::chrono::seconds(5));
+        std::this_thread::sleep_until(std::chrono::system_clock::now() + std::chrono::seconds(2));
     }
 }
 
