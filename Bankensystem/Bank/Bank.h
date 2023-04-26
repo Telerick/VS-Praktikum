@@ -66,7 +66,7 @@ public:
         stockMarketAddr.sin_addr = *((struct in_addr *) stockMarket->h_addr);
         stockMarketAddr.sin_port = htons(UDP_PORT);
 
-        std::cout << "Registering to Stock Market with IP: " << inet_ntoa(stockMarketAddr.sin_addr) << std::endl;
+        std::cout << "Registering to Stock Market (" << inet_ntoa(stockMarketAddr.sin_addr) << ")"<< std::endl;
 
         std::string regMsg = createRegisterMessage();
         // Send a registration message with hostname and all stock acronyms to the stockMarket
