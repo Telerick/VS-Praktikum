@@ -6,6 +6,38 @@ Repo for VS
     <pre>
     docker-compose up --build
     </pre>
+   
+## Wissenswerte Inhalte zum Praktikum
+    
+- **Sockets**  
+    - socket(): to create an object representing the connection
+    - accept(): a blocking call to wait for incoming connection requests; if successful, the call returns a new socket for a separate connection
+    - connect(): to set up a connection to a specified party
+    - close(): to tear down a connection
+    - send(), recv(): to send and receive data over a connection, respectively
+    - Beispiel:
+   ```cpp
+    // (a) A simple server
+    from socket import *
+    s = socket(AF_INET, SOCK_STREAM)
+    (conn, addr) = s.accept()   // returns new socket and addr. client
+    while True:                 // forever
+    data = conn.recv(1024)      // receive data from client
+    if not data: break          // stop if client stopped
+    conn.send(str(data)+"*")    // return sent data plus an "*"
+    conn.close()                // close the connection
+
+    
+    // (b) A client
+    from socket import *
+    s = socket(AF_INET, SOCK_STREAM)
+    s.connect((HOST, PORT))                     // connect to server (block until accepted)
+    s.send(’Hello, world’)                      // send some data
+    data = s.recv(1024)                         // receive the response
+    print data                                  // print the result
+    s.close()                                   // close the connection
+   ```
+   
 
 
 ## Aufgabenstellung

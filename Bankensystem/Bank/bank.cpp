@@ -430,11 +430,11 @@ void receiveMessage(Bank bank) {
             break;
         }
         //std::cout << "After receive" << std::endl;
-        // split the message into its parts
-        std::istringstream iss(message);
-        std::string acronym;
-        unsigned int price, amount;
-        iss >> acronym >> price >> amount;
+      // split the message into its parts
+            std::istringstream iss(message);
+            std::string acronym, needAck;
+            unsigned int price, amount;
+            iss >> acronym >> price >> amount >> needAck;
 
         // print the received message parts and source address
         std::cout << bank.getName() << " received " << nbytes << " bytes from "
@@ -446,6 +446,12 @@ void receiveMessage(Bank bank) {
         muBank.lock();
         bank.updateStock(acronym, price);
         muBank.unlock();
+
+            if (needAck=="true"){
+                std::string ackMessage = bank.getName() + " ACK ";
+                sendMessageToStockMarket(ackMessage);
+            }
+            //std::cout << "INSIDE receiveMessage()" << std::endl;
         //std::cout << "INSIDE receiveMessage()" << std::endl;
 
     }
@@ -455,10 +461,12 @@ void receiveMessage(Bank bank) {
 ////////////////////////////////////////////////////////////////////RUN bank//////////////////////////////////////////////////////////////
 int main() {
     std::string containerName = std::getenv("CONTAINER_NAME");
+    std::string myIP = std::getenv("MY_IPV4_ADDRESS");
     std::hash<std::string> nameHash;
     unsigned int seed = nameHash(containerName);
     srand(seed);
-    Bank bank(fillPortfolio(), containerName);
+
+    Bank bank(fillPortfolio(), containerName, myIP);
 
     registerToStockMarket(bank);
     std::thread interfaceThread([&bank](){ interface(bank); });
@@ -467,10 +475,6 @@ int main() {
     interfaceThread.join();
     receiveMessageThread.join();
 
-    /*
-    std::thread t(bank.bankInterface);
-    t.join();
-     */
 
     return 0;
 };

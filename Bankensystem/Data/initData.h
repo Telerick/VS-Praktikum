@@ -23,7 +23,7 @@ std::vector <std::string> bankNames = {"liliBank", "softBank", "goodBank", "rick
                                        "richBank", "poorBank", "bestBank", "badBank", "funnyBank", "monkeyBank"};
 
 std::vector<BStock *> fillPortfolio() {
-    std::cout << "Start fillPortfolio" << std::endl;
+    //std::cout << "Start fillPortfolio" << std::endl;
     std::vector < BStock * > stocks;
     std::set<int> selectedIndices;
 
@@ -38,7 +38,7 @@ std::vector<BStock *> fillPortfolio() {
         }
     }
 
-    std::cout << "End fillPortfolio" << std::endl;
+    //std::cout << "End fillPortfolio" << std::endl;
     return stocks;
 }
 

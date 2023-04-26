@@ -38,16 +38,14 @@ const int TCP_PORT = 8000;
 
 class Bank {
 public:
-    ////////////////////////////////////////////////////////////////////CONSTRUCTORS//////////////////////////////////////////////////////////////
-
-    Bank(std::vector<BStock *> stocks, std::string name)
-            : portfolio(stocks), cashReserves(100000), outstandingLoans(30000), totalValue(0), name(name) {
-        std::cout << "Start Constructor Bank" << this->name << std::endl;
+    Bank(std::vector<BStock *> stocks, std::string name, std::string myIP)
+            : portfolio(stocks), cashReserves(100000), outstandingLoans(30000), totalValue(0), name(name), myIP(myIP) {
+        //std::cout << "Start Constructor Bank" << this->name << std::endl;
 
         updateTotalValue();
         printBankInformation();
 
-        std::cout << "End Constructor Bank" << this->name << std::endl;
+        // std::cout << "End Constructor Bank" << this->name << std::endl;
     }
 
     Bank(const Bank& other)
@@ -57,10 +55,12 @@ public:
     }
 
     ////////////////////////////////////////////////////////////////////GETTER & SETTER//////////////////////////////////////////////////////////////
+   
 
     unsigned int getTotalValue() {
         return this->totalValue;
     }
+
 
     void setTotalValue(unsigned int val) {
         this->totalValue = val;
@@ -145,8 +145,8 @@ public:
         std::cout << "Total Value " + this->name + ": " << this->totalValue << "€" << std::endl;
     }
 
-    void printBankName() {
-        std::cout << "Bank name " + this->name << std::endl;
+    void printBankNameAndIP() {
+        std::cout << "### " + this->name << " (" << this->myIP << ")" << " ###"<< std::endl;
     }
 
     void printPortfolioData() {
@@ -158,7 +158,7 @@ public:
     }
 
     void printBankInformation() {
-        printBankName();
+        printBankNameAndIP();
         std::cout << std::endl;
         printPortfolioData();
         std::cout << std::endl;
@@ -171,6 +171,7 @@ private:
     int outstandingLoans;
     unsigned int totalValue;
     std::string name;
+    std::string myIP;
 };
 
 #endif // BANKENSYSTEM_BANK_H

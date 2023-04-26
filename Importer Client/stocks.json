@@ -1,0 +1,23 @@
+{
+    "stocks": [
+      {
+        "symbol": "AAPL",
+        "name": "Apple Inc.",
+        "price": 134.50,
+        "quantity": 1000
+      },
+      {
+        "symbol": "GOOGL",
+        "name": "Alphabet Inc.",
+        "price": 2350.75,
+        "quantity": 500
+      },
+      {
+        "symbol": "AMZN",
+        "name": "Amazon.com Inc.",
+        "price": 3242.00,
+        "quantity": 750
+      }
+    ]
+  }
+  
