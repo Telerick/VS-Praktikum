@@ -36,11 +36,13 @@
 const int UDP_PORT = 8080;
 const int TCP_PORT = 8000;
 
-class Bank {
+class Bank
+{
 public:
     Bank(std::vector<BStock *> stocks, std::string name, std::string myIP)
-            : portfolio(stocks), cashReserves(100000), outstandingLoans(30000), totalValue(0), name(name), myIP(myIP) {
-        //std::cout << "Start Constructor Bank" << this->name << std::endl;
+        : portfolio(stocks), cashReserves(100000), outstandingLoans(30000), totalValue(0), name(name), myIP(myIP)
+    {
+        // std::cout << "Start Constructor Bank" << this->name << std::endl;
 
         updateTotalValue();
         printBankInformation();
@@ -48,57 +50,68 @@ public:
         // std::cout << "End Constructor Bank" << this->name << std::endl;
     }
 
-    Bank(const Bank& other)
-            : portfolio(other.portfolio), cashReserves(other.cashReserves), outstandingLoans(other.outstandingLoans),
-              totalValue(other.totalValue), name(other.name) {
+    Bank(const Bank &other)
+        : portfolio(other.portfolio), cashReserves(other.cashReserves), outstandingLoans(other.outstandingLoans),
+          totalValue(other.totalValue), name(other.name)
+    {
         std::cout << "Copy Constructor Bank" << this->name << std::endl;
     }
 
     ////////////////////////////////////////////////////////////////////GETTER & SETTER//////////////////////////////////////////////////////////////
-   
 
-    unsigned int getTotalValue() {
+    unsigned int getTotalValue()
+    {
         return this->totalValue;
     }
 
-
-    void setTotalValue(unsigned int val) {
+    void setTotalValue(unsigned int val)
+    {
         this->totalValue = val;
     }
 
-    std::vector<BStock *> getPortfolio () {
+    std::vector<BStock *> getPortfolio()
+    {
         return this->portfolio;
     }
 
-    int getCashReserves () {
+    int getCashReserves()
+    {
         return this->cashReserves;
     }
 
-    void setCashReserves (int cashReserves) {
+    void setCashReserves(int cashReserves)
+    {
         this->cashReserves = cashReserves;
     }
 
-    int getOutstandingLoans() {
+    int getOutstandingLoans()
+    {
         return this->outstandingLoans;
     }
 
-    void setOutstandingLoans(int outstandingLoans) {
+    void setOutstandingLoans(int outstandingLoans)
+    {
         this->outstandingLoans = outstandingLoans;
     }
 
-    std::string getName() {
+    std::string getName()
+    {
         return this->name;
     }
 
-    void setName(std::string name) {
+    void setName(std::string name)
+    {
         this->name = name;
     }
     ////////////////////////////////////////////////////////////////////UPDATE values methods//////////////////////////////////////////////////////////////
 
-    void updateStock(const std::string &acronym, unsigned int price) {
+    void updateStock(const std::string &acronym, unsigned int price)
+    {
         printTotalValue();
-        for (auto &i: this->portfolio) {
-            if (i->getAcronym() == acronym) {
+        for (auto &i : this->portfolio)
+        {
+            if (i->getAcronym() == acronym)
+            {
                 i->setPrice(price);
                 std::cout << "Stock price for " << i->getAcronym() << " updated!" << std::endl;
                 updateTotalValue();
@@ -108,10 +121,12 @@ public:
         }
     }
 
-    void updateTotalValue() {
+    void updateTotalValue()
+    {
         this->totalValue = 0;
 
-        for (auto &i: this->portfolio) {
+        for (auto &i : this->portfolio)
+        {
             this->totalValue += (i->getAmount() * i->getPrice());
         }
 
@@ -119,20 +134,25 @@ public:
         totalValue -= outstandingLoans;
     }
 
-    void updateCashreserves(int newCashreserves) {
+    void updateCashreserves(int newCashreserves)
+    {
         this->cashReserves = newCashreserves;
         updateTotalValue();
     }
 
-    void updateOutstandingLoans(int newOutstandingLoans) {
+    void updateOutstandingLoans(int newOutstandingLoans)
+    {
         this->outstandingLoans = newOutstandingLoans;
         updateTotalValue();
     }
 
-    void updateStockAmount(std::string acronym, int amount) {
-        for (auto stock: this->portfolio) {
-            if (stock->getAcronym() == acronym) {
-                stock->setAmount((unsigned int) amount);
+    void updateStockAmount(std::string acronym, int amount)
+    {
+        for (auto stock : this->portfolio)
+        {
+            if (stock->getAcronym() == acronym)
+            {
+                stock->setAmount((unsigned int)amount);
                 updateTotalValue();
                 return;
             }
@@ -141,23 +161,32 @@ public:
 
     ////////////////////////////////////////////////////////////////////PRINT methods//////////////////////////////////////////////////////////////
 
-    void printTotalValue() {
+    void printTotalValue()
+    {
         std::cout << "Total Value " + this->name + ": " << this->totalValue << "€" << std::endl;
     }
 
-    void printBankNameAndIP() {
-        std::cout << "### " + this->name << " (" << this->myIP << ")" << " ###"<< std::endl;
+    void printBankNameAndIP()
+    {
+        std::cout << "### " + this->name << " (" << this->myIP << ")"
+                  << " ###" << std::endl;
     }
 
-    void printPortfolioData() {
-        for (int i = 0; i < this->portfolio.size(); i++) {
-            std::cout << i + 1 << " .Stock: " + this->portfolio[i]->getAcronym() << "\t" << "price: "
-                      << this->portfolio[i]->getPrice() << "€" << "\t" << "Amount: " << this->portfolio[i]->getAmount()
+    void printPortfolioData()
+    {
+        for (int i = 0; i < this->portfolio.size(); i++)
+        {
+            std::cout << i + 1 << " .Stock: " + this->portfolio[i]->getAcronym() << "\t"
+                      << "price: "
+                      << this->portfolio[i]->getPrice() << "€"
+                      << "\t"
+                      << "Amount: " << this->portfolio[i]->getAmount()
                       << std::endl;
         }
     }
 
-    void printBankInformation() {
+    void printBankInformation()
+    {
         printBankNameAndIP();
         std::cout << std::endl;
         printPortfolioData();
