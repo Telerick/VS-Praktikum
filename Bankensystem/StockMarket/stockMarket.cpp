@@ -11,6 +11,7 @@
 #include <netdb.h>
 #include "StockMarket.h"
 #include "../Data/initData.h"
+//#include <docker.hpp> // docker API
 
 #ifndef MSG_CONFIRM
 #define MSG_CONFIRM 0x800
@@ -90,8 +91,12 @@ std::vector <std::string> getSubscriber(std::string stock) {
 }
 
 void printVector(std::vector <std::string> v, std::map <std::string, std::string> bankName) {
+    if(v.size() == 0){
+        std::cout << "No Bank subscribed";
+        return;
+    }
     for (const auto &ip: v) {
-        std::cout << bankName[ip];
+        std::cout << bankName[ip];      // bankName map <key,value> = <ip, bankName>
         std::cout << " (" << ip << "),";
     }
 }

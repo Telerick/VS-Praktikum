@@ -8,6 +8,7 @@ services:
       dockerfile: Dockerfile_stockMarket
     environment:
       - CONTAINER_NAME=stockMarket
+      - MY_IPV4_ADDRESS=172.20.0.2
     networks:
       mynet:
         ipv4_address: 172.20.0.2
@@ -18,8 +19,7 @@ services:
       dockerfile: Dockerfile_bank
     environment:
       - CONTAINER_NAME=bankErik
-    healthcheck:
-      test: ["CMD-SHELL", "sleep 1"]
+      - MY_IPV4_ADDRESS=172.20.0.3
     networks:
       mynet:
         ipv4_address: 172.20.0.3
@@ -32,6 +32,7 @@ services:
       dockerfile: Dockerfile_bank
     environment:
       - CONTAINER_NAME=bankDonLangen
+      - MY_IPV4_ADDRESS=172.20.0.4
     depends_on:
       - stock-market
       - bank1
@@ -45,6 +46,7 @@ services:
       dockerfile: Dockerfile_bank
     environment:
       - CONTAINER_NAME=bankLeon
+      - MY_IPV4_ADDRESS=172.20.0.5
     depends_on:
       - stock-market
       - bank1
@@ -59,6 +61,7 @@ services:
       dockerfile: Dockerfile_bank
     environment:
       - CONTAINER_NAME=bankTobi
+      - MY_IPV4_ADDRESS=172.20.0.6
     depends_on:
       - stock-market
       - bank1
