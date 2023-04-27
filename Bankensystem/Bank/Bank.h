@@ -9,7 +9,10 @@
 #include <vector>
 #include <random>
 #include <chrono>
+#include <sstream>
+#include <fstream>
 #include <thread>
+#include <mutex>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -18,6 +21,9 @@
 #include <sys/types.h>
 #include <arpa/inet.h>
 
+#include "rapidjson/document.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
 
 #include <netdb.h>
 
@@ -28,12 +34,15 @@
 #define BANKENSYSTEM_BANK_H
 
 const int UDP_PORT = 8080;
+const int TCP_PORT = 8000;
 
-class Bank {
+class Bank
+{
 public:
     Bank(std::vector<BStock *> stocks, std::string name, std::string myIP)
-            : portfolio(stocks), cashReserves(100000), outstandingLoans(30000), totalValue(0), name(name), myIP(myIP) {
-        //std::cout << "Start Constructor Bank" << this->name << std::endl;
+        : portfolio(stocks), cashReserves(100000), outstandingLoans(30000), totalValue(0), name(name), myIP(myIP)
+    {
+        // std::cout << "Start Constructor Bank" << this->name << std::endl;
 
         updateTotalValue();
         printBankInformation();
@@ -41,167 +50,68 @@ public:
         // std::cout << "End Constructor Bank" << this->name << std::endl;
     }
 
-    void registerToStockMarket() {
-        std::cout << "Start registration process for " << this->name << std::endl;
-
-        int sockfd;
-        // Creating socket file descriptor for stock market
-        if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-            std::cerr << "Error: socket creation failed" << std::endl;
-            exit(EXIT_FAILURE);
-        }
-
-        sockaddr_in stockMarketAddr;
-
-        const char *hostname = "stockMarket";
-        struct hostent *stockMarket = gethostbyname(hostname);
-        if (stockMarket == NULL) {
-            std::cerr << "Error: could not resolve hostname" << std::endl;
-            exit(EXIT_FAILURE);
-        }
-
-        // Filling stockMarket information
-        memset(&stockMarketAddr, 0, sizeof(stockMarketAddr));
-        stockMarketAddr.sin_family = AF_INET;
-        stockMarketAddr.sin_addr = *((struct in_addr *) stockMarket->h_addr);
-        stockMarketAddr.sin_port = htons(UDP_PORT);
-
-        std::cout << "Registering to Stock Market (" << inet_ntoa(stockMarketAddr.sin_addr) << ")"<< std::endl;
-
-        std::string regMsg = createRegisterMessage();
-        // Send a registration message with hostname and all stock acronyms to the stockMarket
-        sendto(sockfd, regMsg.c_str(), regMsg.length(), 0, (struct sockaddr *) &stockMarketAddr,
-               sizeof(stockMarketAddr));
-
-        std::cout << "Registration sent" << std::endl;
+    Bank(const Bank &other)
+        : portfolio(other.portfolio), cashReserves(other.cashReserves), outstandingLoans(other.outstandingLoans),
+          totalValue(other.totalValue), name(other.name)
+    {
+        std::cout << "Copy Constructor Bank" << this->name << std::endl;
     }
 
+    ////////////////////////////////////////////////////////////////////GETTER & SETTER//////////////////////////////////////////////////////////////
 
-    void sendMessageToStockMarket(std::string message) {
-        std::cout << "Sending Message: " << message << std::endl;
-
-        int sockfd;
-        // Creating socket file descriptor for stock market
-        if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-            std::cerr << "Error: socket creation failed" << std::endl;
-            exit(EXIT_FAILURE);
-        }
-
-        sockaddr_in stockMarketAddr;
-
-        const char *hostname = "stockMarket";
-        struct hostent *stockMarket = gethostbyname(hostname);
-        if (stockMarket == NULL) {
-            std::cerr << "Error: could not resolve hostname" << std::endl;
-            exit(EXIT_FAILURE);
-        }
-
-        // Filling stockMarket information
-        memset(&stockMarketAddr, 0, sizeof(stockMarketAddr));
-        stockMarketAddr.sin_family = AF_INET;
-        stockMarketAddr.sin_addr = *((struct in_addr *) stockMarket->h_addr);
-        stockMarketAddr.sin_port = htons(UDP_PORT);
-
-        // Send a registration message with hostname and all stock acronyms to the stockMarket
-        sendto(sockfd, message.c_str(), message.length(), 0, (struct sockaddr *) &stockMarketAddr,
-               sizeof(stockMarketAddr));
-    }
-
-    void receiveMessage() {
-        std::cout << "Start receiveMessage" << std::endl;
-
-        // Creating socket file descriptor for bank
-        int sockfd;
-        if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-            std::cerr << "Error: socket creation failed" << std::endl;
-            exit(EXIT_FAILURE);
-        }
-
-
-        sockaddr_in bankAddr;
-        // Filling bank information
-        memset(&bankAddr, 0, sizeof(bankAddr));
-        bankAddr.sin_family = AF_INET;
-        bankAddr.sin_addr.s_addr = INADDR_ANY;
-        bankAddr.sin_port = htons(UDP_PORT);
-
-        // Bind the socket with the bank address
-        if (bind(sockfd, (const struct sockaddr *) &bankAddr,
-                 sizeof(bankAddr)) < 0) {
-            std::cerr << "Bind failed" << std::endl;
-            exit(EXIT_FAILURE);
-        }
-
-        std::cout << this->name << " ready for receiving messages" << std::endl;
-
-        while (true) {
-            //std::cout << "Before receive" << std::endl;
-            // wait for an incoming message
-            std::string message;
-            message.resize(1024); // allocate space for the received message
-            socklen_t addrlen = sizeof(bankAddr);
-            int nbytes = recvfrom(sockfd, &message[0], message.size(), 0, (struct sockaddr *) &bankAddr,
-                                  &addrlen);
-            if (nbytes < 0) {
-                std::cerr << "Error receiving message" << std::endl;
-                break;
-            }
-
-            std::cout << "Received Message: " << message << std::endl;
-
-            // split the message into its parts
-            std::istringstream iss(message);
-            std::string acronym, needAck;
-            unsigned int price, amount;
-            iss >> acronym >> price >> amount >> needAck;
-
-            // print the received message parts and source address
-            std::cout << this->name << " received " << nbytes << " bytes from "
-                      << inet_ntoa(bankAddr.sin_addr) << std::endl;
-            std::cout << "TRANSACTION ->\tAcronym: " << acronym << "\t";
-            std::cout << "Price: " << price << "\t";
-            std::cout << "Amount: " << amount <<std::endl;
-
-
-            updateStock(acronym, price);
-
-            if (needAck=="true"){
-                std::string ackMessage = this->name + " ACK ";
-                sendMessageToStockMarket(ackMessage);
-            }
-            //std::cout << "INSIDE receiveMessage()" << std::endl;
-
-        }
-        //std::cout << "End receiveMessage" << std::endl;
-    }
-
-    std::string createRegisterMessage() {
-        // Set first attribute of register message as bankname (which is equal to hostname)
-        std::string regMsg = this->name + " ";
-
-        // Set second argument as ttype (sub- or desubscribe // "sub" "desub")
-        regMsg += "sub ";
-
-        // Set third attribute of register message as number of stocks in portfolio
-        regMsg += std::to_string(this->portfolio.size()) + " ";
-
-        // Add all stock acronyms of portfolio to the register message
-        for (auto stock: this->portfolio) {
-            regMsg += stock->getAcronym() + " ";
-        }
-
-        std::cout << "Registration message: " << regMsg << std::endl;
-        return regMsg;
-    }
-
-    unsigned int getValuePortfolio() {
+    unsigned int getTotalValue()
+    {
         return this->totalValue;
     }
 
-    void updateStock(const std::string &acronym, unsigned int price) {
+    void setTotalValue(unsigned int val)
+    {
+        this->totalValue = val;
+    }
+
+    std::vector<BStock *> getPortfolio()
+    {
+        return this->portfolio;
+    }
+
+    int getCashReserves()
+    {
+        return this->cashReserves;
+    }
+
+    void setCashReserves(int cashReserves)
+    {
+        this->cashReserves = cashReserves;
+    }
+
+    int getOutstandingLoans()
+    {
+        return this->outstandingLoans;
+    }
+
+    void setOutstandingLoans(int outstandingLoans)
+    {
+        this->outstandingLoans = outstandingLoans;
+    }
+
+    std::string getName()
+    {
+        return this->name;
+    }
+
+    void setName(std::string name)
+    {
+        this->name = name;
+    }
+    ////////////////////////////////////////////////////////////////////UPDATE values methods//////////////////////////////////////////////////////////////
+
+    void updateStock(const std::string &acronym, unsigned int price)
+    {
         printTotalValue();
-        for (auto &i: this->portfolio) {
-            if (i->getAcronym() == acronym) {
+        for (auto &i : this->portfolio)
+        {
+            if (i->getAcronym() == acronym)
+            {
                 i->setPrice(price);
                 std::cout << "Stock price for " << i->getAcronym() << " updated!" << std::endl;
                 updateTotalValue();
@@ -211,31 +121,72 @@ public:
         }
     }
 
-    void updateTotalValue() {
-        for (auto &i: this->portfolio) {
+    void updateTotalValue()
+    {
+        this->totalValue = 0;
+
+        for (auto &i : this->portfolio)
+        {
             this->totalValue += (i->getAmount() * i->getPrice());
         }
+
         totalValue += cashReserves;
         totalValue -= outstandingLoans;
     }
 
-    void printTotalValue() {
+    void updateCashreserves(int newCashreserves)
+    {
+        this->cashReserves = newCashreserves;
+        updateTotalValue();
+    }
+
+    void updateOutstandingLoans(int newOutstandingLoans)
+    {
+        this->outstandingLoans = newOutstandingLoans;
+        updateTotalValue();
+    }
+
+    void updateStockAmount(std::string acronym, int amount)
+    {
+        for (auto stock : this->portfolio)
+        {
+            if (stock->getAcronym() == acronym)
+            {
+                stock->setAmount((unsigned int)amount);
+                updateTotalValue();
+                return;
+            }
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////PRINT methods//////////////////////////////////////////////////////////////
+
+    void printTotalValue()
+    {
         std::cout << "Total Value " + this->name + ": " << this->totalValue << "€" << std::endl;
     }
 
-    void printBankNameAndIP() {
-        std::cout << "### " + this->name << " (" << this->myIP << ")" << " ###"<< std::endl;
+    void printBankNameAndIP()
+    {
+        std::cout << "### " + this->name << " (" << this->myIP << ")"
+                  << " ###" << std::endl;
     }
 
-    void printPortfolioData() {
-        for (int i = 0; i < this->portfolio.size(); i++) {
-            std::cout << i + 1 << " .Stock: " + this->portfolio[i]->getAcronym() << "\t" << "price: "
-                      << this->portfolio[i]->getPrice() << "€" << "\t" << "Amount: " << this->portfolio[i]->getAmount()
+    void printPortfolioData()
+    {
+        for (int i = 0; i < this->portfolio.size(); i++)
+        {
+            std::cout << i + 1 << " .Stock: " + this->portfolio[i]->getAcronym() << "\t"
+                      << "price: "
+                      << this->portfolio[i]->getPrice() << "€"
+                      << "\t"
+                      << "Amount: " << this->portfolio[i]->getAmount()
                       << std::endl;
         }
     }
 
-    void printBankInformation() {
+    void printBankInformation()
+    {
         printBankNameAndIP();
         std::cout << std::endl;
         printPortfolioData();

@@ -1,5 +1,7 @@
 # Use an official Ubuntu runtime as a parent image
 FROM gcc:latest
+RUN apt-get update && apt-get install -y rapidjson-dev
+
 
 # Set the working directory to /app
 WORKDIR /app
