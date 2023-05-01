@@ -2,8 +2,6 @@
 
 ## Hinweise zu gitlab
 
-- Board aktuell halten
-- Tipp: Schätzen Sie Ihre Issues, um die Arbeitsaufteilung gerecht zu gestalten
 - Naming
   - Datei- und Verzeichnisnamen in Englisch und nur die Zeichen [a-zAZ0-9_-]
   - Commit-Kommentar -- vgl. https://chris.beams.io/posts/git-commit/
