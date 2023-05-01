@@ -1,5 +1,20 @@
 # VS-Praktikum
-Repo for VS
+
+## Hinweise zu gitlab
+
+- Board aktuell halten
+- Tipp: Schätzen Sie Ihre Issues, um die Arbeitsaufteilung gerecht zu gestalten
+- Naming
+  - Datei- und Verzeichnisnamen in Englisch und nur die Zeichen [a-zAZ0-9_-]
+  - Commit-Kommentar -- vgl. https://chris.beams.io/posts/git-commit/
+    - Struktur [feat/fix/docs/style/refactor/learn/orga/test]{ #issue}: Summary
+    - Beispiele
+      - feat #7: Add search endpoint to server
+      - docs: Fix naming in main readme
+- Sprache
+  - gitlab-Commits, Programmcode komplett in Englisch
+  - Issues, Kommentare dort in Deutsch oder Englisch
+
 ## Hinweise zu Docker
 
 - **Starten der Docker-Compose.yml-Datei**
