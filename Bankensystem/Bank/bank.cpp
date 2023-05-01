@@ -228,15 +228,16 @@ void handlePostRequest(int client_sock, const std::string &path, const std::stri
             sendTextResponse(client_sock, 400, response);
         }
     }
-    else if (path == "/cash")
+    else if (path == "/bankValues")
     {
-        // Endpoint to update cash reserves
-        int cashReserves;
         rapidjson::Document doc;
         doc.Parse(data.c_str());
-        if (!doc.HasParseError() && doc.HasMember("cashReserves") && doc["cashReserves"].IsInt())
+        bool isValid = false;
+
+        // Check for cash reserves
+        if (doc.HasMember("cashReserves") && doc["cashReserves"].IsInt())
         {
-            cashReserves = doc["cashReserves"].GetInt();
+            int cashReserves = doc["cashReserves"].GetInt();
             muBank.lock();
             bank.updateCashreserves(cashReserves);
             muBank.unlock();
@@ -245,19 +246,13 @@ void handlePostRequest(int client_sock, const std::string &path, const std::stri
         }
         else
         {
-            std::string response = "Invalid request data";
-            sendTextResponse(client_sock, 400, response);
+            isValid = false;
         }
-    }
-    else if (path == "/credit")
-    {
-        // Endpoint to update outstanding loans
-        int outstandingLoans;
-        rapidjson::Document doc;
-        doc.Parse(data.c_str());
-        if (!doc.HasParseError() && doc.HasMember("outstandingLoans") && doc["outstandingLoans"].IsInt())
+
+        // Check for outstanding loans
+        if (doc.HasMember("outstandingLoans") && doc["outstandingLoans"].IsInt())
         {
-            outstandingLoans = doc["outstandingLoans"].GetInt();
+            int outstandingLoans = doc["outstandingLoans"].GetInt();
             muBank.lock();
             bank.updateOutstandingLoans(outstandingLoans);
             muBank.unlock();
@@ -266,296 +261,301 @@ void handlePostRequest(int client_sock, const std::string &path, const std::stri
         }
         else
         {
+            isValid = false;
+        }
+
+        // If data is not valid, send an error response
+        if (!isValid)
+        {
             std::string response = "Invalid request data";
             sendTextResponse(client_sock, 400, response);
         }
     }
     else
     {
-        std::string response = "Invalid request path";
-        sendTextResponse(client_sock, 404, response);
-    }
-}
-
-////////////////////////////////////////////////////////////////////HTTP interface//////////////////////////////////////////////////////////////
-
-void interface(Bank bank)
-{
-    std::cout << "Start bankInterface" << std::endl;
-    // Create a TCP socket
-    int server_sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (server_sock < 0)
-    {
-        std::cerr << "Failed to create socket" << std::endl;
-        exit(1);
+        std::string response = "Invalid request data";
+        sendTextResponse(client_sock, 400, response);
     }
 
-    // Set up the address and port to bind to
-    struct sockaddr_in server_address;
-    std::memset(&server_address, 0, sizeof(server_address));
-    server_address.sin_family = AF_INET;
-    server_address.sin_port = htons(TCP_PORT);
-    server_address.sin_addr.s_addr = INADDR_ANY;
+    ////////////////////////////////////////////////////////////////////HTTP interface//////////////////////////////////////////////////////////////
 
-    // Bind the socket to the address and port
-    int status = bind(server_sock, (struct sockaddr *)&server_address, sizeof(server_address));
-    if (status < 0)
+    void interface(Bank bank)
     {
-        std::cerr << "Failed to bind socket" << std::endl;
-        exit(1);
-    }
-
-    // Listen for incoming connections
-    status = listen(server_sock, 5);
-    if (status < 0)
-    {
-        std::cerr << "Failed to listen for connections" << std::endl;
-        exit(1);
-    }
-
-    // Accept incoming connections and send a response
-    while (true)
-    {
-        std::cout << "Waiting for connection..." << std::endl;
-        struct sockaddr_in client_address;
-        socklen_t client_address_size = sizeof(client_address);
-        int client_sock = accept(server_sock, (struct sockaddr *)&client_address, &client_address_size);
-        if (client_sock < 0)
+        std::cout << "Start bankInterface" << std::endl;
+        // Create a TCP socket
+        int server_sock = socket(AF_INET, SOCK_STREAM, 0);
+        if (server_sock < 0)
         {
-            std::cerr << "Failed to accept connection" << std::endl;
-            continue;
+            std::cerr << "Failed to create socket" << std::endl;
+            exit(1);
         }
 
-        // Receive data from the client
-        char buffer[1024];
-        int received_bytes = recv(client_sock, buffer, sizeof(buffer), 0);
-        if (received_bytes < 0)
+        // Set up the address and port to bind to
+        struct sockaddr_in server_address;
+        std::memset(&server_address, 0, sizeof(server_address));
+        server_address.sin_family = AF_INET;
+        server_address.sin_port = htons(TCP_PORT);
+        server_address.sin_addr.s_addr = INADDR_ANY;
+
+        // Bind the socket to the address and port
+        int status = bind(server_sock, (struct sockaddr *)&server_address, sizeof(server_address));
+        if (status < 0)
         {
-            std::cerr << "Failed to receive data" << std::endl;
+            std::cerr << "Failed to bind socket" << std::endl;
+            exit(1);
+        }
+
+        // Listen for incoming connections
+        status = listen(server_sock, 5);
+        if (status < 0)
+        {
+            std::cerr << "Failed to listen for connections" << std::endl;
+            exit(1);
+        }
+
+        // Accept incoming connections and send a response
+        while (true)
+        {
+            std::cout << "Waiting for connection..." << std::endl;
+            struct sockaddr_in client_address;
+            socklen_t client_address_size = sizeof(client_address);
+            int client_sock = accept(server_sock, (struct sockaddr *)&client_address, &client_address_size);
+            if (client_sock < 0)
+            {
+                std::cerr << "Failed to accept connection" << std::endl;
+                continue;
+            }
+
+            // Receive data from the client
+            char buffer[1024];
+            int received_bytes = recv(client_sock, buffer, sizeof(buffer), 0);
+            if (received_bytes < 0)
+            {
+                std::cerr << "Failed to receive data" << std::endl;
+                close(client_sock);
+                continue;
+            }
+
+            // Parse the request
+            std::istringstream request_stream(buffer);
+            std::string request_line;
+            std::getline(request_stream, request_line);
+            std::istringstream request_line_stream(request_line);
+            std::string http_method, path, http_version;
+            request_line_stream >> http_method >> path >> http_version;
+
+            // Determine the request method
+            if (http_method == "GET")
+            {
+                // Handle GET request
+                handleGetRequest(client_sock, path, bank);
+            }
+            else if (http_method == "POST")
+            {
+                // Handle POST request
+                // Extract data from the request body
+                std::string data = request_stream.str().substr(request_stream.tellg());
+                handlePostRequest(client_sock, path, data, bank);
+            }
+            else
+            {
+                // Handle other request methods
+                std::cerr << "Unsupported HTTP method: " << http_method << std::endl;
+                handleOtherRequests(client_sock);
+            }
+
+            // Close the client socket
             close(client_sock);
-            continue;
         }
 
-        // Parse the request
-        std::istringstream request_stream(buffer);
-        std::string request_line;
-        std::getline(request_stream, request_line);
-        std::istringstream request_line_stream(request_line);
-        std::string http_method, path, http_version;
-        request_line_stream >> http_method >> path >> http_version;
+        // Close the server socket
+        close(server_sock);
+    }
 
-        // Determine the request method
-        if (http_method == "GET")
+    ////////////////////////////////////////////////////////////////////UDP specific//////////////////////////////////////////////////////////////
+    std::string createRegisterMessage(Bank bank)
+    {
+        // Set first attribute of register message as bankname (which is equal to hostname)
+        std::string regMsg = bank.getName() + " ";
+
+        // Set second argument as ttype (sub- or desubscribe // "sub" "desub")
+        regMsg += "sub ";
+
+        // Set third attribute of register message as number of stocks in portfolio
+        regMsg += std::to_string(bank.getPortfolio().size()) + " ";
+
+        // Add all stock acronyms of portfolio to the register message
+        for (auto stock : bank.getPortfolio())
         {
-            // Handle GET request
-            handleGetRequest(client_sock, path, bank);
+            regMsg += stock->getAcronym() + " ";
         }
-        else if (http_method == "POST")
+
+        std::cout << "Registration message: " << regMsg << std::endl;
+        return regMsg;
+    }
+
+    void registerToStockMarket(Bank bank)
+    {
+        std::cout << "Start registration process for " << bank.getName() << std::endl;
+
+        int sockfd;
+        // Creating socket file descriptor for stock market
+        if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
         {
-            // Handle POST request
-            // Extract data from the request body
-            std::string data = request_stream.str().substr(request_stream.tellg());
-            handlePostRequest(client_sock, path, data, bank);
+            std::cerr << "Error: socket creation failed" << std::endl;
+            exit(EXIT_FAILURE);
         }
-        else
+
+        sockaddr_in stockMarketAddr;
+
+        const char *hostname = "stockMarket";
+        struct hostent *stockMarket = gethostbyname(hostname);
+        if (stockMarket == NULL)
         {
-            // Handle other request methods
-            std::cerr << "Unsupported HTTP method: " << http_method << std::endl;
-            handleOtherRequests(client_sock);
+            std::cerr << "Error: could not resolve hostname" << std::endl;
+            exit(EXIT_FAILURE);
         }
 
-        // Close the client socket
-        close(client_sock);
+        // Filling stockMarket information
+        memset(&stockMarketAddr, 0, sizeof(stockMarketAddr));
+        stockMarketAddr.sin_family = AF_INET;
+        stockMarketAddr.sin_addr = *((struct in_addr *)stockMarket->h_addr);
+        stockMarketAddr.sin_port = htons(UDP_PORT);
+
+        std::cout << "Registering to Stock Market with IP: " << inet_ntoa(stockMarketAddr.sin_addr) << std::endl;
+
+        std::string regMsg = createRegisterMessage(bank);
+        // Send a registration message with hostname and all stock acronyms to the stockMarket
+        sendto(sockfd, regMsg.c_str(), regMsg.length(), 0, (struct sockaddr *)&stockMarketAddr,
+               sizeof(stockMarketAddr));
+
+        std::cout << "Registration sent" << std::endl;
     }
 
-    // Close the server socket
-    close(server_sock);
-}
-
-////////////////////////////////////////////////////////////////////UDP specific//////////////////////////////////////////////////////////////
-std::string createRegisterMessage(Bank bank)
-{
-    // Set first attribute of register message as bankname (which is equal to hostname)
-    std::string regMsg = bank.getName() + " ";
-
-    // Set second argument as ttype (sub- or desubscribe // "sub" "desub")
-    regMsg += "sub ";
-
-    // Set third attribute of register message as number of stocks in portfolio
-    regMsg += std::to_string(bank.getPortfolio().size()) + " ";
-
-    // Add all stock acronyms of portfolio to the register message
-    for (auto stock : bank.getPortfolio())
+    void sendMessageToStockMarket(std::string message)
     {
-        regMsg += stock->getAcronym() + " ";
-    }
+        std::cout << "Sending Message: " << message << std::endl;
 
-    std::cout << "Registration message: " << regMsg << std::endl;
-    return regMsg;
-}
-
-void registerToStockMarket(Bank bank)
-{
-    std::cout << "Start registration process for " << bank.getName() << std::endl;
-
-    int sockfd;
-    // Creating socket file descriptor for stock market
-    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-    {
-        std::cerr << "Error: socket creation failed" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-    sockaddr_in stockMarketAddr;
-
-    const char *hostname = "stockMarket";
-    struct hostent *stockMarket = gethostbyname(hostname);
-    if (stockMarket == NULL)
-    {
-        std::cerr << "Error: could not resolve hostname" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-    // Filling stockMarket information
-    memset(&stockMarketAddr, 0, sizeof(stockMarketAddr));
-    stockMarketAddr.sin_family = AF_INET;
-    stockMarketAddr.sin_addr = *((struct in_addr *)stockMarket->h_addr);
-    stockMarketAddr.sin_port = htons(UDP_PORT);
-
-    std::cout << "Registering to Stock Market with IP: " << inet_ntoa(stockMarketAddr.sin_addr) << std::endl;
-
-    std::string regMsg = createRegisterMessage(bank);
-    // Send a registration message with hostname and all stock acronyms to the stockMarket
-    sendto(sockfd, regMsg.c_str(), regMsg.length(), 0, (struct sockaddr *)&stockMarketAddr,
-           sizeof(stockMarketAddr));
-
-    std::cout << "Registration sent" << std::endl;
-}
-
-void sendMessageToStockMarket(std::string message)
-{
-    std::cout << "Sending Message: " << message << std::endl;
-
-    int sockfd;
-    // Creating socket file descriptor for stock market
-    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-    {
-        std::cerr << "Error: socket creation failed" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-    sockaddr_in stockMarketAddr;
-
-    const char *hostname = "stockMarket";
-    struct hostent *stockMarket = gethostbyname(hostname);
-    if (stockMarket == NULL)
-    {
-        std::cerr << "Error: could not resolve hostname" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-    // Filling stockMarket information
-    memset(&stockMarketAddr, 0, sizeof(stockMarketAddr));
-    stockMarketAddr.sin_family = AF_INET;
-    stockMarketAddr.sin_addr = *((struct in_addr *)stockMarket->h_addr);
-    stockMarketAddr.sin_port = htons(UDP_PORT);
-
-    // Send a registration message with hostname and all stock acronyms to the stockMarket
-    sendto(sockfd, message.c_str(), message.length(), 0, (struct sockaddr *)&stockMarketAddr,
-           sizeof(stockMarketAddr));
-}
-
-void receiveMessage(Bank bank)
-{
-    std::cout << "Start receiveMessage" << std::endl;
-
-    // Creating socket file descriptor for bank
-    int sockfd;
-    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-    {
-        std::cerr << "Error: socket creation failed" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-    sockaddr_in bankAddr;
-    // Filling bank information
-    memset(&bankAddr, 0, sizeof(bankAddr));
-    bankAddr.sin_family = AF_INET;
-    bankAddr.sin_addr.s_addr = INADDR_ANY;
-    bankAddr.sin_port = htons(UDP_PORT);
-
-    // Bind the socket with the bank address
-    if (bind(sockfd, (const struct sockaddr *)&bankAddr,
-             sizeof(bankAddr)) < 0)
-    {
-        std::cerr << "Bind failed" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-    std::cout << bank.getName() << " ready for receiving messages" << std::endl;
-
-    while (true)
-    {
-        // std::cout << "Before receive" << std::endl;
-        //  wait for an incoming message
-        std::string message;
-        message.resize(1024); // allocate space for the received message
-        socklen_t addrlen = sizeof(bankAddr);
-        int nbytes = recvfrom(sockfd, &message[0], message.size(), 0, (struct sockaddr *)&bankAddr,
-                              &addrlen);
-        if (nbytes < 0)
+        int sockfd;
+        // Creating socket file descriptor for stock market
+        if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
         {
-            std::cerr << "Error receiving message" << std::endl;
-            break;
+            std::cerr << "Error: socket creation failed" << std::endl;
+            exit(EXIT_FAILURE);
         }
-        // std::cout << "After receive" << std::endl;
-        // split the message into its parts
-        std::istringstream iss(message);
-        std::string acronym, needAck;
-        unsigned int price, amount;
-        iss >> acronym >> price >> amount >> needAck;
 
-        // print the received message parts and source address
-        std::cout << bank.getName() << " received " << nbytes << " bytes from "
-                  << inet_ntoa(bankAddr.sin_addr) << std::endl;
-        std::cout << "TRANSACTION ->\tAcronym: " << acronym << "\t";
-        std::cout << "Price: " << price << "\t";
-        std::cout << "Amount: " << amount << std::endl;
+        sockaddr_in stockMarketAddr;
 
-        muBank.lock();
-        bank.updateStock(acronym, price);
-        muBank.unlock();
-
-        if (needAck == "true")
+        const char *hostname = "stockMarket";
+        struct hostent *stockMarket = gethostbyname(hostname);
+        if (stockMarket == NULL)
         {
-            std::string ackMessage = bank.getName() + " ACK ";
-            sendMessageToStockMarket(ackMessage);
+            std::cerr << "Error: could not resolve hostname" << std::endl;
+            exit(EXIT_FAILURE);
         }
-        // std::cout << "INSIDE receiveMessage()" << std::endl;
-        // std::cout << "INSIDE receiveMessage()" << std::endl;
+
+        // Filling stockMarket information
+        memset(&stockMarketAddr, 0, sizeof(stockMarketAddr));
+        stockMarketAddr.sin_family = AF_INET;
+        stockMarketAddr.sin_addr = *((struct in_addr *)stockMarket->h_addr);
+        stockMarketAddr.sin_port = htons(UDP_PORT);
+
+        // Send a registration message with hostname and all stock acronyms to the stockMarket
+        sendto(sockfd, message.c_str(), message.length(), 0, (struct sockaddr *)&stockMarketAddr,
+               sizeof(stockMarketAddr));
     }
-    // std::cout << "End receiveMessage" << std::endl;
-}
 
-////////////////////////////////////////////////////////////////////RUN bank//////////////////////////////////////////////////////////////
-int main()
-{
-    std::string containerName = std::getenv("CONTAINER_NAME");
-    std::string myIP = std::getenv("MY_IPV4_ADDRESS");
-    std::hash<std::string> nameHash;
-    unsigned int seed = nameHash(containerName);
-    srand(seed);
+    void receiveMessage(Bank bank)
+    {
+        std::cout << "Start receiveMessage" << std::endl;
 
-    Bank bank(fillPortfolio(), containerName, myIP);
+        // Creating socket file descriptor for bank
+        int sockfd;
+        if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+        {
+            std::cerr << "Error: socket creation failed" << std::endl;
+            exit(EXIT_FAILURE);
+        }
 
-    registerToStockMarket(bank);
-    std::thread interfaceThread([&bank]()
-                                { interface(bank); });
-    std::thread receiveMessageThread([&bank]()
-                                     { receiveMessage(bank); });
+        sockaddr_in bankAddr;
+        // Filling bank information
+        memset(&bankAddr, 0, sizeof(bankAddr));
+        bankAddr.sin_family = AF_INET;
+        bankAddr.sin_addr.s_addr = INADDR_ANY;
+        bankAddr.sin_port = htons(UDP_PORT);
 
-    interfaceThread.join();
-    receiveMessageThread.join();
+        // Bind the socket with the bank address
+        if (bind(sockfd, (const struct sockaddr *)&bankAddr,
+                 sizeof(bankAddr)) < 0)
+        {
+            std::cerr << "Bind failed" << std::endl;
+            exit(EXIT_FAILURE);
+        }
 
-    return 0;
-};
+        std::cout << bank.getName() << " ready for receiving messages" << std::endl;
+
+        while (true)
+        {
+            // std::cout << "Before receive" << std::endl;
+            //  wait for an incoming message
+            std::string message;
+            message.resize(1024); // allocate space for the received message
+            socklen_t addrlen = sizeof(bankAddr);
+            int nbytes = recvfrom(sockfd, &message[0], message.size(), 0, (struct sockaddr *)&bankAddr,
+                                  &addrlen);
+            if (nbytes < 0)
+            {
+                std::cerr << "Error receiving message" << std::endl;
+                break;
+            }
+            // std::cout << "After receive" << std::endl;
+            // split the message into its parts
+            std::istringstream iss(message);
+            std::string acronym, needAck;
+            unsigned int price, amount;
+            iss >> acronym >> price >> amount >> needAck;
+
+            // print the received message parts and source address
+            std::cout << bank.getName() << " received " << nbytes << " bytes from "
+                      << inet_ntoa(bankAddr.sin_addr) << std::endl;
+            std::cout << "TRANSACTION ->\tAcronym: " << acronym << "\t";
+            std::cout << "Price: " << price << "\t";
+            std::cout << "Amount: " << amount << std::endl;
+
+            muBank.lock();
+            bank.updateStock(acronym, price);
+            muBank.unlock();
+
+            if (needAck == "true")
+            {
+                std::string ackMessage = bank.getName() + " ACK ";
+                sendMessageToStockMarket(ackMessage);
+            }
+            // std::cout << "INSIDE receiveMessage()" << std::endl;
+            // std::cout << "INSIDE receiveMessage()" << std::endl;
+        }
+        // std::cout << "End receiveMessage" << std::endl;
+    }
+
+    ////////////////////////////////////////////////////////////////////RUN bank//////////////////////////////////////////////////////////////
+    int main()
+    {
+        std::string containerName = std::getenv("CONTAINER_NAME");
+        std::string myIP = std::getenv("MY_IPV4_ADDRESS");
+        std::hash<std::string> nameHash;
+        unsigned int seed = nameHash(containerName);
+        srand(seed);
+
+        Bank bank(fillPortfolio(), containerName, myIP);
+
+        registerToStockMarket(bank);
+        std::thread interfaceThread([&bank]()
+                                    { interface(bank); });
+        std::thread receiveMessageThread([&bank]()
+                                         { receiveMessage(bank); });
+
+        interfaceThread.join();
+        receiveMessageThread.join();
+
+        return 0;
+    };
